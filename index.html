@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FinanceHub — Smart Money Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ═══ CURSOR GLOW ═══════════════════════════════════════════════════════ -->
+<div class="cursor-glow" id="cursorGlow"></div>
+
+<!-- ═══ PARTICLES BACKGROUND ════════════════════════════════════════════ -->
+<div class="particles" id="particles"></div>
+
+<!-- ═══ AUTH SCREEN ══════════════════════════════════════════════════════ -->
+<div id="authContainer" class="auth-container">
+
+    <!-- Left panel -->
+    <div class="auth-panel auth-left">
+        <div class="auth-brand">
+            <div class="brand-icon">
+                <svg viewBox="0 0 40 40" fill="none">
+                    <circle cx="20" cy="20" r="20" fill="url(#grad1)"/>
+                    <path d="M12 28 L20 12 L28 28" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                    <path d="M15 23 L25 23" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+                    <defs>
+                        <linearGradient id="grad1" x1="0" y1="0" x2="40" y2="40">
+                            <stop offset="0%" stop-color="#6C63FF"/>
+                            <stop offset="100%" stop-color="#3B82F6"/>
+                        </linearGradient>
+                    </defs>
+                </svg>
+            </div>
+            <h1 class="brand-name">FinanceHub</h1>
+            <p class="brand-tag">Your complete financial command center</p>
+        </div>
+
+        <div class="auth-features">
+            <div class="feature-item">
+                <span class="fi-icon">📊</span>
+                <div>
+                    <strong>Real-Time Tracking</strong>
+                    <p>Income, expenses & savings synced live</p>
+                </div>
+            </div>
+            <div class="feature-item">
+                <span class="fi-icon">🧮</span>
+                <div>
+                    <strong>Smart Tax Calculator</strong>
+                    <p>Old vs New regime comparison</p>
+                </div>
+            </div>
+            <div class="feature-item">
+                <span class="fi-icon">💡</span>
+                <div>
+                    <strong>Health Score</strong>
+                    <p>AI-powered financial fitness analysis</p>
+                </div>
+            </div>
+            <div class="feature-item">
+                <span class="fi-icon">🔒</span>
+                <div>
+                    <strong>Bank-Grade Security</strong>
+                    <p>Powered by Firebase Firestore</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="auth-bg-orb orb1"></div>
+        <div class="auth-bg-orb orb2"></div>
+    </div>
+
+    <!-- Right panel -->
+    <div class="auth-panel auth-right">
+        <div class="auth-box" id="authBox">
+            <div id="alertBox"></div>
+
+            <!-- Login Form -->
+            <div id="loginForm" class="auth-form active">
+                <div class="form-header">
+                    <h2>Welcome back 👋</h2>
+                    <p>Sign in to your account</p>
+                </div>
+
+                <div class="form-group floating">
+                    <input type="email" id="loginEmail" placeholder=" " autocomplete="email">
+                    <label>Email address</label>
+                    <span class="field-icon">✉️</span>
+                </div>
+                <div class="form-group floating">
+                    <input type="password" id="loginPassword" placeholder=" " autocomplete="current-password">
+                    <label>Password</label>
+                    <span class="field-icon" id="toggleLoginPass" onclick="togglePass('loginPassword','toggleLoginPass')">👁️</span>
+                </div>
+
+                <button class="btn-submit" id="loginBtn" onclick="handleLogin()">
+                    <span>Sign In</span>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </button>
+
+                <p class="auth-switch">Don't have an account? <button onclick="toggleAuthForm()">Create one</button></p>
+            </div>
+
+            <!-- Register Form -->
+            <div id="registerForm" class="auth-form">
+                <div class="form-header">
+                    <h2>Get started 🚀</h2>
+                    <p>Create your free account</p>
+                </div>
+
+                <div class="form-group floating">
+                    <input type="text" id="registerName" placeholder=" " autocomplete="name">
+                    <label>Full name</label>
+                    <span class="field-icon">👤</span>
+                </div>
+                <div class="form-group floating">
+                    <input type="email" id="registerEmail" placeholder=" " autocomplete="email">
+                    <label>Email address</label>
+                    <span class="field-icon">✉️</span>
+                </div>
+                <div class="form-group floating">
+                    <input type="password" id="registerPassword" placeholder=" " autocomplete="new-password">
+                    <label>Password (min 6 chars)</label>
+                    <span class="field-icon" id="toggleRegPass" onclick="togglePass('registerPassword','toggleRegPass')">👁️</span>
+                </div>
+
+                <div class="password-strength" id="passStrength">
+                    <div class="strength-bar"><div class="strength-fill" id="strengthFill"></div></div>
+                    <span id="strengthLabel">Enter a password</span>
+                </div>
+
+                <button class="btn-submit" id="registerBtn" onclick="handleRegister()">
+                    <span>Create Account</span>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </button>
+
+                <p class="auth-switch">Already have an account? <button onclick="toggleAuthForm()">Sign in</button></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ═══ DASHBOARD ════════════════════════════════════════════════════════ -->
+<div id="dashboardContainer" class="dashboard hidden">
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-brand">
+            <div class="brand-icon-sm">💰</div>
+            <span>FinanceHub</span>
+        </div>
+
+        <nav class="sidebar-nav">
+            <button class="nav-item active" onclick="switchTab('overview',this)" data-tab="overview">
+                <span class="nav-icon">📊</span>
+                <span class="nav-label">Overview</span>
+                <span class="nav-indicator"></span>
+            </button>
+            <button class="nav-item" onclick="switchTab('income',this)" data-tab="income">
+                <span class="nav-icon">💼</span>
+                <span class="nav-label">Income</span>
+                <span class="nav-indicator"></span>
+            </button>
+            <button class="nav-item" onclick="switchTab('expenses',this)" data-tab="expenses">
+                <span class="nav-icon">🧾</span>
+                <span class="nav-label">Expenses</span>
+                <span class="nav-indicator"></span>
+            </button>
+            <button class="nav-item" onclick="switchTab('savings',this)" data-tab="savings">
+                <span class="nav-icon">🏦</span>
+                <span class="nav-label">Savings</span>
+                <span class="nav-indicator"></span>
+            </button>
+            <button class="nav-item" onclick="switchTab('tax',this)" data-tab="tax">
+                <span class="nav-icon">🧮</span>
+                <span class="nav-label">Tax</span>
+                <span class="nav-indicator"></span>
+            </button>
+            <button class="nav-item" onclick="switchTab('health',this)" data-tab="health">
+                <span class="nav-icon">💡</span>
+                <span class="nav-label">Health Score</span>
+                <span class="nav-indicator"></span>
+            </button>
+        </nav>
+
+        <div class="sidebar-footer">
+            <div class="user-pill">
+                <div class="user-avatar" id="userAvatar">U</div>
+                <div class="user-info">
+                    <span class="user-name" id="userName">User</span>
+                    <span class="user-role">Member</span>
+                </div>
+            </div>
+            <button class="btn-logout" onclick="handleLogout()" title="Logout">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            </button>
+        </div>
+    </aside>
+
+    <!-- Mobile Topbar -->
+    <div class="mobile-topbar">
+        <button class="hamburger" id="hamburger" onclick="toggleSidebar()">
+            <span></span><span></span><span></span>
+        </button>
+        <span class="mobile-brand">💰 FinanceHub</span>
+        <button class="btn-logout-sm" onclick="handleLogout()">⏻</button>
+    </div>
+
+    <!-- Main content -->
+    <main class="main-content" id="mainContent">
+
+        <!-- Page header -->
+        <div class="page-header">
+            <div>
+                <h1 class="page-title" id="pageTitle">Overview</h1>
+                <p class="page-subtitle" id="pageSubtitle">Your financial summary at a glance</p>
+            </div>
+            <div class="header-time" id="headerTime"></div>
+        </div>
+
+        <!-- Stat Cards -->
+        <div class="stats-grid" id="statsGrid">
+            <div class="stat-card" style="--delay:0s">
+                <div class="stat-icon">💼</div>
+                <div class="stat-body">
+                    <span class="stat-label">Annual Income</span>
+                    <span class="stat-value" id="statIncome">₹0</span>
+                </div>
+                <div class="stat-trend up">▲ Active</div>
+            </div>
+            <div class="stat-card" style="--delay:.1s">
+                <div class="stat-icon">🧾</div>
+                <div class="stat-body">
+                    <span class="stat-label">Avg Monthly Expense</span>
+                    <span class="stat-value" id="statExpense">₹0</span>
+                </div>
+                <div class="stat-trend neutral">~ Monthly</div>
+            </div>
+            <div class="stat-card" style="--delay:.2s">
+                <div class="stat-icon">🏦</div>
+                <div class="stat-body">
+                    <span class="stat-label">Total Savings</span>
+                    <span class="stat-value" id="statSavings">₹0</span>
+                </div>
+                <div class="stat-trend up">▲ Growing</div>
+            </div>
+            <div class="stat-card accent" style="--delay:.3s">
+                <div class="stat-icon">💡</div>
+                <div class="stat-body">
+                    <span class="stat-label">Health Score</span>
+                    <span class="stat-value" id="statHealth">—</span>
+                </div>
+                <div class="stat-trend" id="statHealthBadge">/ 100</div>
+            </div>
+        </div>
+
+        <!-- Tab Contents -->
+
+        <!-- OVERVIEW TAB -->
+        <div id="overviewTab" class="tab-content active">
+            <div class="grid-2">
+                <div class="card">
+                    <div class="card-header">
+                        <span>📈 Summary</span>
+                        <span class="card-badge">Live</span>
+                    </div>
+                    <div id="overviewContent" class="loading-state">
+                        <div class="skeleton"></div>
+                        <div class="skeleton short"></div>
+                        <div class="skeleton"></div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <span>🔥 Firebase Info</span>
+                    </div>
+                    <div class="info-banner">
+                        <div class="info-icon">🔥</div>
+                        <div>
+                            <strong>Live Cloud Database</strong>
+                            <p>Data saved to <code>Cloud Firestore</code> in real-time. Each user's data lives under <code>users/{uid}/</code> protected by Security Rules.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-header">
+                    <span>🧾 Recent Expenses</span>
+                    <button class="card-action" onclick="switchTab('expenses', document.querySelector('[data-tab=expenses]'))">View all →</button>
+                </div>
+                <div id="recentExpenses" class="loading-state">
+                    <div class="skeleton"></div>
+                    <div class="skeleton short"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- INCOME TAB -->
+        <div id="incomeTab" class="tab-content">
+            <div class="grid-2">
+                <div class="card">
+                    <div class="card-header"><span>💼 Add / Update Income</span></div>
+                    <div class="form-grid">
+                        <div class="form-group-inline">
+                            <label>Financial Year</label>
+                            <input id="incYear" value="2024-25" class="inp">
+                        </div>
+                        <div class="form-group-inline">
+                            <label>Salary (₹)</label>
+                            <input type="number" id="salary" placeholder="800000" class="inp">
+                        </div>
+                        <div class="form-group-inline">
+                            <label>Bonus (₹)</label>
+                            <input type="number" id="bonus" value="0" class="inp">
+                        </div>
+                        <div class="form-group-inline">
+                            <label>Rental Income (₹)</label>
+                            <input type="number" id="rental" value="0" class="inp">
+                        </div>
+                        <div class="form-group-inline">
+                            <label>Capital Gains (₹)</label>
+                            <input type="number" id="capgains" value="0" class="inp">
+                        </div>
+                        <div class="form-group-inline">
+                            <label>Other Income (₹)</label>
+                            <input type="number" id="otherinc" value="0" class="inp">
+                        </div>
+                    </div>
+                    <button class="btn-action" onclick="saveIncome()">💾 Save Income</button>
+                </div>
+                <div class="card">
+                    <div class="card-header"><span>📋 Tax Deductions</span></div>
+                    <div class="form-grid">
+                        <div class="form-group-inline">
+                            <label>Section 80C (₹)</label>
+                            <input type="number" id="d80c" value="0" class="inp">
+                        </div>
+                        <div class="form-group-inline">
+                            <label>Section 80D (₹)</label>
+                            <input type="number" id="d80d" value="0" class="inp">
+                        </div>
+                        <div class="form-group-inline">
+                            <label>Section 80G (₹)</label>
+                            <input type="number" id="d80g" value="0" class="inp">
+                        </div>
+                        <div class="form-group-inline">
+                            <label>Home Loan Interest (₹)</label>
+                            <input type="number" id="d24" value="0" class="inp">
+                        </div>
+                        <div class="form-group-inline">
+                            <label>NPS 80CCD (₹)</label>
+                            <input type="number" id="dnps" value="0" class="inp">
+                        </div>
+                        <div class="form-group-inline">
+                            <label>HRA Exemption (₹)</label>
+                            <input type="number" id="dhra" value="0" class="inp">
+                        </div>
+                    </div>
+                    <button class="btn-action" onclick="saveDeductions()">💾 Save Deductions</button>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-header"><span>📑 Saved Income Records</span></div>
+                <div id="incomeTable" class="loading-state"><div class="skeleton"></div></div>
+            </div>
+        </div>
+
+        <!-- EXPENSES TAB -->
+        <div id="expensesTab" class="tab-content">
+            <div class="card">
+                <div class="card-header"><span>🧾 Add Monthly Expenses</span></div>
+                <div class="form-grid-3">
+                    <div class="form-group-inline">
+                        <label>Month-Year (YYYY-MM)</label>
+                        <input id="expMonth" placeholder="2024-12" class="inp">
+                    </div>
+                    <div class="form-group-inline">
+                        <label>Rent (₹)</label>
+                        <input type="number" id="eRent" value="0" class="inp">
+                    </div>
+                    <div class="form-group-inline">
+                        <label>Groceries (₹)</label>
+                        <input type="number" id="eGrocery" value="0" class="inp">
+                    </div>
+                    <div class="form-group-inline">
+                        <label>Utilities (₹)</label>
+                        <input type="number" id="eUtil" value="0" class="inp">
+                    </div>
+                    <div class="form-group-inline">
+                        <label>Transportation (₹)</label>
+                        <input type="number" id="eTrans" value="0" class="inp">
+                    </div>
+                    <div class="form-group-inline">
+                        <label>Entertainment (₹)</label>
+                        <input type="number" id="eEnt" value="0" class="inp">
+                    </div>
+                    <div class="form-group-inline">
+                        <label>Healthcare (₹)</label>
+                        <input type="number" id="eHealth" value="0" class="inp">
+                    </div>
+                    <div class="form-group-inline">
+                        <label>Education (₹)</label>
+                        <input type="number" id="eEdu" value="0" class="inp">
+                    </div>
+                </div>
+                <button class="btn-action" onclick="saveExpense()">💾 Save Expenses</button>
+            </div>
+            <div class="card">
+                <div class="card-header"><span>📋 Expense History</span></div>
+                <div id="expenseTable" class="loading-state"><div class="skeleton"></div></div>
+            </div>
+        </div>
+
+        <!-- SAVINGS TAB -->
+        <div id="savingsTab" class="tab-content">
+            <div class="card">
+                <div class="card-header"><span>🏦 Add Monthly Savings</span></div>
+                <div class="form-grid-3">
+                    <div class="form-group-inline">
+                        <label>Month-Year (YYYY-MM)</label>
+                        <input id="savMonth" placeholder="2024-12" class="inp">
+                    </div>
+                    <div class="form-group-inline">
+                        <label>Fixed Deposits (₹)</label>
+                        <input type="number" id="sFD" value="0" class="inp">
+                    </div>
+                    <div class="form-group-inline">
+                        <label>Mutual Funds (₹)</label>
+                        <input type="number" id="sMF" value="0" class="inp">
+                    </div>
+                    <div class="form-group-inline">
+                        <label>PPF (₹)</label>
+                        <input type="number" id="sPPF" value="0" class="inp">
+                    </div>
+                    <div class="form-group-inline">
+                        <label>Stocks (₹)</label>
+                        <input type="number" id="sStocks" value="0" class="inp">
+                    </div>
+                    <div class="form-group-inline">
+                        <label>Gold (₹)</label>
+                        <input type="number" id="sGold" value="0" class="inp">
+                    </div>
+                    <div class="form-group-inline">
+                        <label>Emergency Fund (₹)</label>
+                        <input type="number" id="sEmerg" value="0" class="inp">
+                    </div>
+                </div>
+                <button class="btn-action" onclick="saveSavings()">💾 Save Savings</button>
+            </div>
+            <div class="card">
+                <div class="card-header"><span>📋 Savings History</span></div>
+                <div id="savingsTable" class="loading-state"><div class="skeleton"></div></div>
+            </div>
+        </div>
+
+        <!-- TAX TAB -->
+        <div id="taxTab" class="tab-content">
+            <div class="card">
+                <div class="card-header"><span>🧮 Tax Calculator</span></div>
+                <div class="tax-input-row">
+                    <div class="form-group-inline" style="max-width:280px">
+                        <label>Financial Year</label>
+                        <input id="taxYear" value="2024-25" class="inp">
+                    </div>
+                    <button class="btn-action" onclick="calculateTax()">Calculate Tax ⚡</button>
+                </div>
+                <div id="taxResult" style="margin-top:25px;"></div>
+            </div>
+        </div>
+
+        <!-- HEALTH TAB -->
+        <div id="healthTab" class="tab-content">
+            <div class="card">
+                <div class="card-header"><span>💡 Financial Health Score</span></div>
+                <p style="color:var(--text-muted);margin-bottom:20px;font-size:0.9rem;">Based on your savings ratio, expense ratio, and portfolio diversification.</p>
+                <button class="btn-action" onclick="calcHealth()">Analyse My Finances 🔍</button>
+                <div id="healthResult" style="margin-top:25px;"></div>
+            </div>
+        </div>
+
+    </main>
+</div>
+
+<!-- Toast notification -->
+<div id="toast" class="toast" aria-live="polite"></div>
+
+<!-- ═══ FIREBASE SDKs ════════════════════════════════════════════════════ -->
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script src="app.js"></script>
+
+</body>
+</html>
