@@ -4,15 +4,18 @@
    ═══════════════════════════════════════════════════════════════ */
 
 /* ══════════════════════════════════════════════════════════════
-   FIREBASE CONFIG — replace with yours from Firebase Console
+   FIREBASE CONFIG — Finance2 project
    ══════════════════════════════════════════════════════════════ */
+
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-    apiKey:            "AIzaSyBEGOpuxZsbFLQIz8jxj5avVVGoz2ano_E",
-    authDomain:        "project-2e9a4535-6825-484c-997.firebaseapp.com",
-    projectId:         "project-2e9a4535-6825-484c-997",
-    storageBucket:     "project-2e9a4535-6825-484c-997.firebasestorage.app",
-    messagingSenderId: "398727607304",
-    appId:             "1:398727607304:web:ed51a375fc80fd99accdbd"
+  apiKey: "AIzaSyBD_h5vlzZlKsvACxYO4DgHCGlHBUtZ-Es",
+  authDomain: "finance2-23040.firebaseapp.com",
+  projectId: "finance2-23040",
+  storageBucket: "finance2-23040.firebasestorage.app",
+  messagingSenderId: "116457563366",
+  appId: "1:116457563366:web:64e04929121d671b3b0727",
+  measurementId: "G-2SWG2SBERN"
 };
 
 firebase.initializeApp(firebaseConfig);
@@ -255,16 +258,16 @@ function getOrCreateOverlay() {
    TAB SWITCHING
    ══════════════════════════════════════════════════════════════ */
 const tabMeta = {
-    overview: { title:'Overview',      subtitle:'Your financial summary at a glance' },
-    income:   { title:'Income',        subtitle:'Manage income sources and tax deductions' },
-    expenses: { title:'Expenses',      subtitle:'Track monthly spending patterns' },
-    savings:  { title:'Savings',       subtitle:'Monitor your investment portfolio' },
-    tax:      { title:'Tax Planner',   subtitle:'Compare old vs new tax regime' },
-    health:   { title:'Health Score',  subtitle:'Analyse your financial fitness' },
+    overview: { title:'Overview',        subtitle:'Your financial summary at a glance' },
+    income:   { title:'Income',          subtitle:'Manage income sources and tax deductions' },
+    expenses: { title:'Expenses',        subtitle:'Track monthly spending patterns' },
+    savings:  { title:'Savings',         subtitle:'Monitor your investment portfolio' },
+    tax:      { title:'Tax Planner',     subtitle:'Compare old vs new tax regime' },
+    health:   { title:'Health Score',    subtitle:'Analyse your financial fitness' },
+    ai:       { title:'AI Predictions',  subtitle:'ML-powered forecasts & Claude AI deep analysis' },
 };
 
 function switchTab(name, btn) {
-    /* Nav items */
     document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
     if (btn) btn.classList.add('active');
     else {
@@ -272,16 +275,13 @@ function switchTab(name, btn) {
         if (target) target.classList.add('active');
     }
 
-    /* Content */
     document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
     document.getElementById(name + 'Tab')?.classList.add('active');
 
-    /* Header */
     const meta = tabMeta[name] || {};
     document.getElementById('pageTitle').textContent    = meta.title    || name;
     document.getElementById('pageSubtitle').textContent = meta.subtitle || '';
 
-    /* Close sidebar on mobile */
     const sidebar = document.getElementById('sidebar');
     if (window.innerWidth <= 900 && sidebar.classList.contains('open')) {
         toggleSidebar();
@@ -327,6 +327,7 @@ async function saveDeductions() {
     try {
         await deductRef(yr).set(doc, { merge: true });
         toast('✅ Deductions saved!', 'success');
+        loadDeductionTable();
     } catch (e) { toast('❌ ' + e.message, 'error'); }
 }
 
@@ -393,11 +394,26 @@ async function deleteSaving(mo) {
     } catch (e) { toast('❌ ' + e.message, 'error'); }
 }
 
+async function deleteDeduction(yr) {
+    if (!confirm(`Delete deduction record for FY ${yr}?`)) return;
+    try {
+        await deductRef(yr).delete();
+        toast('🗑️ Deleted!', 'success');
+        loadDeductionTable();
+    } catch (e) { toast('❌ ' + e.message, 'error'); }
+}
+
 /* ══════════════════════════════════════════════════════════════
    LOAD FUNCTIONS
    ══════════════════════════════════════════════════════════════ */
 async function loadAllData() {
-    await Promise.all([loadOverview(), loadIncomeTable(), loadExpenseTable(), loadSavingsTable()]);
+    await Promise.all([
+        loadOverview(),
+        loadIncomeTable(),
+        loadDeductionTable(),
+        loadExpenseTable(),
+        loadSavingsTable()
+    ]);
 }
 
 /* ── Overview ─────────────────────────────────────────────── */
@@ -417,14 +433,14 @@ async function loadOverview() {
             ? expenses.reduce((s, e) => s + e.total_expenses, 0) / expenses.length : 0;
         const totalSav = savings.reduce((s, sv) => s + sv.total_savings, 0);
 
-        /* Stat cards */
         animateCount('statIncome',  totalInc);
         animateCount('statExpense', Math.round(avgExp));
         animateCount('statSavings', totalSav);
 
         let healthScore = '—';
         if (totalInc > 0) {
-            const savRatio = (totalSav / totalInc) * 100;
+            const avgSav   = savings.length ? totalSav / savings.length : 0;
+            const savRatio = (avgSav * 12 / totalInc) * 100;
             const expRatio = (avgExp * 12 / totalInc) * 100;
             healthScore = Math.min(100, Math.max(0,
                 Math.round((savRatio >= 20 ? 40 : savRatio * 2) +
@@ -438,7 +454,6 @@ async function loadOverview() {
             hBadge.className = 'stat-trend ' + (healthScore >= 70 ? 'up' : 'neutral');
         }
 
-        /* Summary card */
         document.getElementById('overviewContent').innerHTML = inc ? `
             <div class="overview-summary">
                 <div class="section-label">Latest Record — FY ${inc.financial_year}</div>
@@ -450,7 +465,6 @@ async function loadOverview() {
             </div>
         ` : `<p style="color:var(--text-muted);padding:12px 0;font-size:.9rem;">No data yet. Go to the <strong>Income</strong> tab to get started.</p>`;
 
-        /* Recent expenses */
         const recent = [...expenses].sort((a, b) => b.month_year.localeCompare(a.month_year)).slice(0, 5);
         document.getElementById('recentExpenses').innerHTML = recent.length ? `
             <div class="table-wrap">
@@ -477,10 +491,22 @@ async function loadOverview() {
 async function loadIncomeTable() {
     try {
         const snap = await userRef().collection('income').orderBy('financial_year', 'desc').get();
-        if (snap.empty) { document.getElementById('incomeTable').innerHTML = '<p style="color:var(--text-muted);font-size:.9rem;">No income records yet.</p>'; return; }
+        if (snap.empty) {
+            document.getElementById('incomeTable').innerHTML =
+                '<p style="color:var(--text-muted);font-size:.9rem;">No income records yet.</p>';
+            return;
+        }
         document.getElementById('incomeTable').innerHTML = `
             <div class="table-wrap"><table>
-                <thead><tr><th>Year</th><th>Salary</th><th>Bonus</th><th>Other</th><th>Total</th></tr></thead>
+                <thead><tr>
+                    <th>Year</th>
+                    <th>Salary <span class="th-badge badge-annual">Annual</span></th>
+                    <th>Bonus <span class="th-badge badge-lumpsum">Lump-sum</span></th>
+                    <th>Rental <span class="th-badge badge-annual">Annual</span></th>
+                    <th>Capital Gains <span class="th-badge badge-lumpsum">Lump-sum</span></th>
+                    <th>Other <span class="th-badge badge-annual">Annual</span></th>
+                    <th>Total</th>
+                </tr></thead>
                 <tbody>
                 ${snap.docs.map(d => {
                     const r = d.data();
@@ -488,7 +514,9 @@ async function loadIncomeTable() {
                         <td>${r.financial_year}</td>
                         <td>${fmt(r.salary)}</td>
                         <td>${fmt(r.bonus)}</td>
-                        <td>${fmt((r.rental_income||0)+(r.capital_gains||0)+(r.other_income||0))}</td>
+                        <td>${fmt(r.rental_income || 0)}</td>
+                        <td>${fmt(r.capital_gains || 0)}</td>
+                        <td>${fmt(r.other_income || 0)}</td>
                         <td><strong>${fmt(r.total_income)}</strong></td>
                     </tr>`;
                 }).join('')}
@@ -499,11 +527,59 @@ async function loadIncomeTable() {
     }
 }
 
+/* ── Deduction Table ──────────────────────────────────────── */
+async function loadDeductionTable() {
+    try {
+        const snap = await userRef().collection('deductions').orderBy('financial_year', 'desc').get();
+        if (snap.empty) {
+            document.getElementById('deductionTable').innerHTML =
+                '<p style="color:var(--text-muted);font-size:.9rem;">No deduction records yet. Fill in the Tax Deductions form above and click Save Deductions.</p>';
+            return;
+        }
+        document.getElementById('deductionTable').innerHTML = `
+            <div class="table-wrap"><table>
+                <thead><tr>
+                    <th>Year</th>
+                    <th>80C <span class="th-badge badge-annual">Annual</span></th>
+                    <th>80D <span class="th-badge badge-annual">Annual</span></th>
+                    <th>80G <span class="th-badge badge-lumpsum">Lump-sum</span></th>
+                    <th>Home Loan Int. <span class="th-badge badge-annual">Annual</span></th>
+                    <th>NPS 80CCD <span class="th-badge badge-annual">Annual</span></th>
+                    <th>HRA Exemption <span class="th-badge badge-annual">Annual</span></th>
+                    <th>Total Deductions</th>
+                    <th>Action</th>
+                </tr></thead>
+                <tbody>
+                ${snap.docs.map(d => {
+                    const r = d.data();
+                    return `<tr>
+                        <td>${r.financial_year}</td>
+                        <td>${fmt(r.section_80c || 0)}</td>
+                        <td>${fmt(r.section_80d || 0)}</td>
+                        <td>${fmt(r.section_80g || 0)}</td>
+                        <td>${fmt(r.section_24 || 0)}</td>
+                        <td>${fmt(r.nps_80ccd || 0)}</td>
+                        <td>${fmt(r.hra_exemption || 0)}</td>
+                        <td><strong>${fmt(r.total_deductions || 0)}</strong></td>
+                        <td><button class="action-btn del" onclick="deleteDeduction('${r.financial_year}')">🗑️ Delete</button></td>
+                    </tr>`;
+                }).join('')}
+                </tbody>
+            </table></div>`;
+    } catch (e) {
+        document.getElementById('deductionTable').innerHTML = `<p style="color:var(--red);">${e.message}</p>`;
+    }
+}
+
 /* ── Expense Table ────────────────────────────────────────── */
 async function loadExpenseTable() {
     try {
         const snap = await userRef().collection('expenses').orderBy('month_year', 'desc').get();
-        if (snap.empty) { document.getElementById('expenseTable').innerHTML = '<p style="color:var(--text-muted);font-size:.9rem;">No expense records yet.</p>'; return; }
+        if (snap.empty) {
+            document.getElementById('expenseTable').innerHTML =
+                '<p style="color:var(--text-muted);font-size:.9rem;">No expense records yet.</p>';
+            return;
+        }
         document.getElementById('expenseTable').innerHTML = `
             <div class="table-wrap"><table>
                 <thead><tr><th>Month</th><th>Rent</th><th>Groceries</th><th>Utilities</th><th>Transport</th><th>Total</th><th>Action</th></tr></thead>
@@ -531,7 +607,11 @@ async function loadExpenseTable() {
 async function loadSavingsTable() {
     try {
         const snap = await userRef().collection('savings').orderBy('month_year', 'desc').get();
-        if (snap.empty) { document.getElementById('savingsTable').innerHTML = '<p style="color:var(--text-muted);font-size:.9rem;">No savings records yet.</p>'; return; }
+        if (snap.empty) {
+            document.getElementById('savingsTable').innerHTML =
+                '<p style="color:var(--text-muted);font-size:.9rem;">No savings records yet.</p>';
+            return;
+        }
         document.getElementById('savingsTable').innerHTML = `
             <div class="table-wrap"><table>
                 <thead><tr><th>Month</th><th>FDs</th><th>Mutual Funds</th><th>PPF</th><th>Stocks</th><th>Total</th><th>Action</th></tr></thead>
@@ -572,7 +652,6 @@ async function calculateTax() {
         const ded   = dedSnap.exists ? dedSnap.data() : {};
         const gross = inc.total_income;
 
-        /* Old Regime */
         const std      = 50000;
         const totalDed = Math.min(ded.section_80c  || 0, 150000)
                        + Math.min(ded.section_80d  || 0, 25000)
@@ -583,7 +662,6 @@ async function calculateTax() {
         const oldTaxable = Math.max(0, gross - std - totalDed);
         const oldTax     = calcOldTax(oldTaxable);
 
-        /* New Regime */
         const newStd     = 75000;
         const newTaxable = Math.max(0, gross - newStd);
         const newTax     = calcNewTax(newTaxable);
@@ -665,7 +743,10 @@ async function calcHealth() {
         const avgExp    = expenses.length ? expenses.reduce((s, e) => s + e.total_expenses, 0) / expenses.length : 0;
         const totalSav  = savings.reduce((s, sv) => s + sv.total_savings, 0);
         const annualExp = avgExp * 12;
-        const savRatio  = annualInc > 0 ? (totalSav / annualInc) * 100 : 0;
+
+        const avgSav    = savings.length ? totalSav / savings.length : 0;
+        const annualSav = avgSav * 12;
+        const savRatio  = annualInc > 0 ? (annualSav / annualInc) * 100 : 0;
         const expRatio  = annualInc > 0 ? (annualExp / annualInc) * 100 : 0;
 
         const savScore = Math.min(40, savRatio * 2);
@@ -680,7 +761,7 @@ async function calcHealth() {
         const cat = overall >= 80 ? '🌟 Excellent' : overall >= 60 ? '😊 Good' : overall >= 40 ? '😐 Fair' : '⚠️ Needs Attention';
         const catColor = overall >= 80 ? 'var(--green)' : overall >= 60 ? '#6C63FF' : overall >= 40 ? 'var(--yellow)' : 'var(--red)';
 
-        const circumference = 2 * Math.PI * 70; // r=70
+        const circumference = 2 * Math.PI * 70;
         const dash          = (overall / 100) * circumference;
 
         const recs = [];
@@ -709,7 +790,7 @@ async function calcHealth() {
             <div class="health-metrics">
                 <div class="hm-card">
                     <div class="hm-val">${savRatio.toFixed(1)}%</div>
-                    <div class="hm-label">Savings Ratio
+                    <div class="hm-label">Savings Ratio <span style="font-size:.65rem;color:var(--text-dim)">(annualised)</span>
                         <span class="hm-badge" style="color:${savRatio >= 20 ? 'var(--green)' : 'var(--red)'}">
                             ${savRatio >= 20 ? '✅ Good ≥ 20%' : '⚠️ Low < 20%'}
                         </span>
@@ -737,7 +818,6 @@ async function calcHealth() {
             </div>
         `;
 
-        /* Animate ring */
         setTimeout(() => {
             const ring = document.getElementById('healthRing');
             if (ring) ring.style.strokeDasharray = `${dash} ${circumference}`;
@@ -757,7 +837,6 @@ function fmt(n) {
     return '₹' + (n || 0).toLocaleString('en-IN', { maximumFractionDigits: 0 });
 }
 
-/* Animated counter */
 function animateCount(id, target) {
     const el = document.getElementById(id);
     if (!el) return;
@@ -773,7 +852,6 @@ function animateCount(id, target) {
     requestAnimationFrame(tick);
 }
 
-/* Toast */
 let toastTimer;
 function toast(msg, type = 'success') {
     clearTimeout(toastTimer);
@@ -781,4 +859,462 @@ function toast(msg, type = 'success') {
     t.textContent = msg;
     t.className   = `toast ${type} show`;
     toastTimer    = setTimeout(() => t.classList.remove('show'), 3200);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   AI PREDICTIONS ENGINE
+   ══════════════════════════════════════════════════════════════ */
+
+let forecastChartInstance = null;
+
+function linearRegression(yArr) {
+    const n = yArr.length;
+    if (n < 2) return { slope: 0, intercept: yArr[0] || 0, r2: 0 };
+    const xArr = yArr.map((_, i) => i);
+    const xMean = xArr.reduce((a, b) => a + b, 0) / n;
+    const yMean = yArr.reduce((a, b) => a + b, 0) / n;
+    let num = 0, den = 0, ssTot = 0, ssRes = 0;
+    for (let i = 0; i < n; i++) {
+        num += (xArr[i] - xMean) * (yArr[i] - yMean);
+        den += (xArr[i] - xMean) ** 2;
+    }
+    const slope     = den !== 0 ? num / den : 0;
+    const intercept = yMean - slope * xMean;
+    for (let i = 0; i < n; i++) {
+        const pred = slope * xArr[i] + intercept;
+        ssRes += (yArr[i] - pred) ** 2;
+        ssTot += (yArr[i] - yMean) ** 2;
+    }
+    const r2 = ssTot > 0 ? Math.max(0, 1 - ssRes / ssTot) : 0;
+    return { slope, intercept, r2 };
+}
+
+function expSmoothForecast(data, steps, alpha = 0.3) {
+    if (!data.length) return Array(steps).fill(0);
+    let s = data[0];
+    for (let i = 1; i < data.length; i++) s = alpha * data[i] + (1 - alpha) * s;
+    const lr   = linearRegression(data);
+    const preds = [];
+    for (let i = 1; i <= steps; i++) {
+        const trendVal = lr.slope * (data.length + i) + lr.intercept;
+        preds.push(Math.max(0, Math.round(0.6 * s + 0.4 * trendVal)));
+        s = alpha * s + (1 - alpha) * s;
+    }
+    return preds;
+}
+
+function weightedMA(arr, weights = null) {
+    if (!arr.length) return 0;
+    const n = arr.length;
+    const w = weights || arr.map((_, i) => i + 1);
+    const wSlice = w.slice(-n);
+    const wSum   = wSlice.reduce((a, b) => a + b, 0);
+    return arr.reduce((sum, val, i) => sum + val * wSlice[i], 0) / wSum;
+}
+
+function detectAnomalies(records, field, threshold = 1.8) {
+    const vals  = records.map(r => r[field] || 0);
+    const mean  = vals.reduce((a, b) => a + b, 0) / vals.length;
+    const std   = Math.sqrt(vals.reduce((s, v) => s + (v - mean) ** 2, 0) / vals.length);
+    if (std === 0) return [];
+    return records
+        .map((r, i) => ({ month: r.month_year, value: vals[i], z: (vals[i] - mean) / std }))
+        .filter(a => Math.abs(a.z) >= threshold && a.value > 0)
+        .sort((a, b) => Math.abs(b.z) - Math.abs(a.z));
+}
+
+function confidenceBand(data, forecasts) {
+    const residuals = data.slice(-Math.min(data.length, 6));
+    const mean = residuals.reduce((a, b) => a + b, 0) / residuals.length;
+    const std  = Math.sqrt(residuals.reduce((s, v) => s + (v - mean) ** 2, 0) / residuals.length);
+    return forecasts.map((f, i) => ({
+        upper: Math.round(f + std * (1 + i * 0.1)),
+        lower: Math.max(0, Math.round(f - std * (1 + i * 0.1)))
+    }));
+}
+
+async function runAIPredictions() {
+    const btn   = document.getElementById('btnAILabel');
+    btn.textContent = '⏳ Analysing…';
+    document.getElementById('btnRunAI').disabled = true;
+
+    try {
+        const [incSnap, expSnap, savSnap] = await Promise.all([
+            userRef().collection('income').orderBy('financial_year', 'desc').get(),
+            userRef().collection('expenses').orderBy('month_year', 'asc').get(),
+            userRef().collection('savings').orderBy('month_year', 'asc').get()
+        ]);
+
+        const incomes  = incSnap.docs.map(d => d.data());
+        const expenses = expSnap.docs.map(d => d.data());
+        const savings  = savSnap.docs.map(d => d.data());
+        const latestInc = incomes[0] || null;
+
+        if (!latestInc) {
+            toast('⚠️ Add income data first to run AI predictions.', 'error');
+            btn.textContent = '▶ Run Full Analysis';
+            document.getElementById('btnRunAI').disabled = false;
+            return;
+        }
+
+        const expTotals  = expenses.map(e => e.total_expenses);
+        const savTotals  = savings.map(s => s.total_savings);
+        const annualInc  = latestInc.total_income;
+        const monthlyInc = annualInc / 12;
+
+        const expLR  = linearRegression(expTotals);
+        const savLR  = linearRegression(savTotals);
+
+        const expWMA       = weightedMA(expTotals);
+        const expExpSmooth = expSmoothForecast(expTotals, 1)[0];
+        const expLRNext    = expLR.slope * expTotals.length + expLR.intercept;
+        const nextExpense  = Math.max(0, Math.round(
+            (expWMA * 0.3 + expExpSmooth * 0.4 + expLRNext * 0.3)
+        ));
+
+        const savWMA       = weightedMA(savTotals);
+        const savExpSmooth = expSmoothForecast(savTotals, 1)[0];
+        const savLRNext    = savLR.slope * savTotals.length + savLR.intercept;
+        const nextSaving   = Math.max(0, Math.round(
+            (savWMA * 0.3 + savExpSmooth * 0.4 + savLRNext * 0.3)
+        ));
+
+        const exp6  = expSmoothForecast(expTotals, 6);
+        const sav6  = expSmoothForecast(savTotals, 6);
+        const expCI = confidenceBand(expTotals, exp6);
+        const savCI = confidenceBand(savTotals, sav6);
+
+        const projAnnualSav = nextSaving * 12;
+
+        const avgExp    = expTotals.length ? expTotals.reduce((a, b) => a + b, 0) / expTotals.length : monthlyInc * 0.4;
+        const goalAmt   = avgExp * 6;
+        const curSavTot = savTotals.reduce((a, b) => a + b, 0);
+        const remaining = Math.max(0, goalAmt - curSavTot);
+        const etaMonths = nextSaving > 0 ? Math.ceil(remaining / nextSaving) : null;
+
+        const expAnomalies  = detectAnomalies(expenses, 'total_expenses');
+        const rentAnom      = detectAnomalies(expenses, 'rent');
+        const grocAnom      = detectAnomalies(expenses, 'groceries');
+        const utilAnom      = detectAnomalies(expenses, 'utilities');
+        const allAnomalies  = [
+            ...expAnomalies.map(a  => ({ ...a, cat: 'Total Expenses' })),
+            ...rentAnom.map(a      => ({ ...a, cat: 'Rent' })),
+            ...grocAnom.map(a      => ({ ...a, cat: 'Groceries' })),
+            ...utilAnom.map(a      => ({ ...a, cat: 'Utilities' })),
+        ].sort((a, b) => Math.abs(b.z) - Math.abs(a.z)).slice(0, 6);
+
+        const catFields = ['rent','groceries','utilities','transportation','entertainment','healthcare','education'];
+        const catPreds  = catFields.map(f => {
+            const vals  = expenses.map(e => e[f] || 0);
+            const pred  = vals.length ? Math.max(0, Math.round(weightedMA(vals) * 0.5 + expSmoothForecast(vals, 1)[0] * 0.5)) : 0;
+            return { name: f.charAt(0).toUpperCase() + f.slice(1), predicted: pred };
+        }).filter(c => c.predicted > 0);
+
+        updatePredCard('predExpense', fmt(nextExpense),
+            `WMA·ExpSmooth·LR blend | R²=${expLR.r2.toFixed(2)}`,
+            nextExpense > avgExp ? '↑ Above average' : '↓ Below average',
+            nextExpense > avgExp ? 'warn' : 'good');
+
+        updatePredCard('predSavings', fmt(projAnnualSav),
+            `Projected from monthly avg ×12`,
+            projAnnualSav >= annualInc * 0.2 ? '✅ On track ≥ 20%' : '⚠️ Below 20% target',
+            projAnnualSav >= annualInc * 0.2 ? 'good' : 'warn');
+
+        updatePredCard('predGoal', etaMonths !== null ? `${etaMonths} months` : 'Goal met!',
+            `Emergency fund goal: ${fmt(Math.round(goalAmt))}`,
+            etaMonths !== null ? `Remaining: ${fmt(Math.round(remaining))}` : '🎉 Emergency fund complete!',
+            etaMonths !== null && etaMonths <= 6 ? 'good' : etaMonths === null ? 'good' : 'warn');
+
+        updatePredCard('predAnomaly',
+            allAnomalies.length === 0 ? 'None Found' : `${allAnomalies.length} detected`,
+            allAnomalies.length === 0 ? 'All spending patterns normal' : 'Unusual spending detected',
+            allAnomalies.length === 0 ? '✅ Healthy spending' : '⚠️ Review details below',
+            allAnomalies.length === 0 ? 'good' : 'warn');
+
+        renderForecastChart(expenses, savings, exp6, sav6, expCI, savCI);
+        renderCategoryPred(catPreds, nextExpense);
+        renderAnomalies(allAnomalies);
+
+        ['forecastChartCard','categoryPredCard','anomalyCard','claudeAnalysisCard']
+            .forEach(id => document.getElementById(id).style.display = 'block');
+
+        runClaudeAnalysis({
+            latestInc, expenses, savings,
+            nextExpense, nextSaving, projAnnualSav,
+            expLR, savLR, allAnomalies, etaMonths,
+            goalAmt, avgExp, catPreds
+        });
+
+    } catch(e) {
+        toast('❌ AI Error: ' + e.message, 'error');
+        console.error(e);
+    } finally {
+        btn.textContent = '▶ Run Full Analysis';
+        document.getElementById('btnRunAI').disabled = false;
+    }
+}
+
+function updatePredCard(id, val, sub, trend, type) {
+    document.getElementById(id + 'Val').textContent   = val;
+    document.getElementById(id + 'Sub').textContent   = sub;
+    const trendEl = document.getElementById(id + 'Trend');
+    trendEl.textContent  = trend;
+    trendEl.className    = 'ai-card-trend ' + type;
+    document.getElementById(id).classList.add('loaded');
+}
+
+function renderForecastChart(expenses, savings, exp6, sav6, expCI, savCI) {
+    if (forecastChartInstance) { forecastChartInstance.destroy(); }
+    const ctx = document.getElementById('forecastChart').getContext('2d');
+
+    const histMonths = expenses.slice(-6).map(e => e.month_year);
+    const lastMonth  = histMonths[histMonths.length - 1] || '2024-12';
+    const [yr, mo]   = lastMonth.split('-').map(Number);
+    const forecastLabels = [];
+    for (let i = 1; i <= 6; i++) {
+        const d = new Date(yr, mo - 1 + i);
+        forecastLabels.push(`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`);
+    }
+    const allLabels = [...histMonths, ...forecastLabels];
+
+    const histExp = expenses.slice(-6).map(e => e.total_expenses);
+    const histSav = savings.slice(-6).map(s => s.total_savings);
+    const nullPad = len => Array(len).fill(null);
+
+    forecastChartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: allLabels,
+            datasets: [
+                {
+                    label: 'Historical Expenses',
+                    data: [...histExp, ...nullPad(6)],
+                    borderColor: '#FF4F6B', backgroundColor: 'rgba(255,79,107,.08)',
+                    borderWidth: 2.5, pointRadius: 4, tension: 0.4, fill: false
+                },
+                {
+                    label: 'Predicted Expenses',
+                    data: [...nullPad(Math.max(0, histExp.length - 1)), histExp[histExp.length-1] || null, ...exp6],
+                    borderColor: '#FF4F6B', borderDash: [6,4], backgroundColor: 'transparent',
+                    borderWidth: 2, pointRadius: 3, tension: 0.4, fill: false
+                },
+                {
+                    label: 'Historical Savings',
+                    data: [...histSav, ...nullPad(6)],
+                    borderColor: '#10D48E', backgroundColor: 'rgba(16,212,142,.08)',
+                    borderWidth: 2.5, pointRadius: 4, tension: 0.4, fill: false
+                },
+                {
+                    label: 'Predicted Savings',
+                    data: [...nullPad(Math.max(0, histSav.length - 1)), histSav[histSav.length-1] || null, ...sav6],
+                    borderColor: '#10D48E', borderDash: [6,4], backgroundColor: 'transparent',
+                    borderWidth: 2, pointRadius: 3, tension: 0.4, fill: false
+                },
+                {
+                    label: 'Exp Upper Band',
+                    data: [...nullPad(histExp.length), ...expCI.map(c => c.upper)],
+                    borderColor: 'transparent', backgroundColor: 'rgba(255,79,107,.07)',
+                    fill: '+1', pointRadius: 0, tension: 0.4
+                },
+                {
+                    label: 'Exp Lower Band',
+                    data: [...nullPad(histExp.length), ...expCI.map(c => c.lower)],
+                    borderColor: 'transparent', backgroundColor: 'rgba(255,79,107,.07)',
+                    fill: false, pointRadius: 0, tension: 0.4
+                }
+            ]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            interaction: { mode: 'index', intersect: false },
+            plugins: {
+                legend: { labels: { color: '#7B80A0', font: { size: 11 }, filter: i => !i.text.includes('Band') } },
+                tooltip: { callbacks: { label: ctx => ` ${ctx.dataset.label}: ₹${ctx.raw?.toLocaleString('en-IN') || '—'}` } }
+            },
+            scales: {
+                x: { grid: { color: 'rgba(255,255,255,.04)' }, ticks: { color: '#7B80A0', font: { size: 10 } } },
+                y: {
+                    grid: { color: 'rgba(255,255,255,.04)' },
+                    ticks: { color: '#7B80A0', font: { size: 10 }, callback: v => '₹' + (v/1000).toFixed(0) + 'K' }
+                }
+            }
+        }
+    });
+}
+
+function renderCategoryPred(catPreds, totalPred) {
+    const el = document.getElementById('categoryPredContent');
+    el.innerHTML = `
+        <div class="cat-pred-grid">
+        ${catPreds.map(c => {
+            const pct = totalPred > 0 ? ((c.predicted / totalPred) * 100).toFixed(1) : 0;
+            const barW = Math.min(100, parseFloat(pct));
+            return `
+            <div class="cat-pred-row">
+                <div class="cat-pred-label">${c.name}</div>
+                <div class="cat-pred-bar-wrap">
+                    <div class="cat-pred-bar" style="width:${barW}%"></div>
+                </div>
+                <div class="cat-pred-val">${fmt(c.predicted)}</div>
+                <div class="cat-pred-pct">${pct}%</div>
+            </div>`;
+        }).join('')}
+        </div>
+        <p style="color:var(--text-muted);font-size:.78rem;margin-top:12px;">
+            Predicted using Weighted Moving Average + Exponential Smoothing blend per category.
+        </p>
+    `;
+}
+
+function renderAnomalies(anomalies) {
+    const el = document.getElementById('anomalyContent');
+    if (!anomalies.length) {
+        el.innerHTML = `<div class="anomaly-ok">✅ No spending anomalies detected — your spending patterns are consistent!</div>`;
+        return;
+    }
+    el.innerHTML = `
+        <p style="color:var(--text-muted);font-size:.82rem;margin-bottom:16px;">
+            Detected using Z-Score analysis (threshold ≥ 1.8σ). These months had unusually high or low spending.
+        </p>
+        <div class="table-wrap"><table>
+            <thead><tr><th>Month</th><th>Category</th><th>Amount</th><th>Z-Score</th><th>Severity</th></tr></thead>
+            <tbody>
+            ${anomalies.map(a => {
+                const sev  = Math.abs(a.z) >= 2.5 ? '🔴 High' : Math.abs(a.z) >= 2 ? '🟡 Medium' : '🟢 Low';
+                const dir  = a.z > 0 ? '↑ Spike' : '↓ Drop';
+                return `<tr>
+                    <td>${a.month}</td>
+                    <td>${a.cat}</td>
+                    <td>${fmt(Math.round(a.value))}</td>
+                    <td style="color:${Math.abs(a.z)>=2?'var(--red)':'var(--yellow)'}">${dir} ${a.z.toFixed(2)}σ</td>
+                    <td>${sev}</td>
+                </tr>`;
+            }).join('')}
+            </tbody>
+        </table></div>`;
+}
+
+async function runClaudeAnalysis(data) {
+    const el = document.getElementById('claudeAnalysisContent');
+    el.innerHTML = `<div class="claude-thinking"><div class="claude-pulse"></div><span>Claude is reading your financial profile securely…</span></div>`;
+
+    const { latestInc, expenses, savings, nextExpense, nextSaving,
+            projAnnualSav, expLR, savLR, allAnomalies, etaMonths,
+            goalAmt, avgExp, catPreds } = data;
+
+    const totalSav = savings.reduce((s, sv) => s + sv.total_savings, 0);
+    const avgSavMo = savings.length ? totalSav / savings.length : 0;
+    const savRatio = latestInc.total_income > 0
+        ? ((avgSavMo * 12) / latestInc.total_income * 100).toFixed(1) : 0;
+    const expRatio = latestInc.total_income > 0
+        ? ((avgExp * 12) / latestInc.total_income * 100).toFixed(1) : 0;
+
+    const incomeBracket =
+        latestInc.total_income < 300000  ? 'Under ₹3L'  :
+        latestInc.total_income < 500000  ? '₹3L–₹5L'   :
+        latestInc.total_income < 700000  ? '₹5L–₹7L'   :
+        latestInc.total_income < 1000000 ? '₹7L–₹10L'  :
+        latestInc.total_income < 1500000 ? '₹10L–₹15L' :
+        latestInc.total_income < 2500000 ? '₹15L–₹25L' : 'Above ₹25L';
+
+    const hasBonus    = (latestInc.bonus || 0) > 0;
+    const hasRental   = (latestInc.rental_income || 0) > 0;
+    const hasCapGains = (latestInc.capital_gains || 0) > 0;
+
+    const expTotal = catPreds.reduce((s, c) => s + c.predicted, 0);
+    const catBreakdown = catPreds.slice(0, 5).map(c => ({
+        name: c.name,
+        pct:  expTotal > 0 ? ((c.predicted / expTotal) * 100).toFixed(1) : 0
+    }));
+
+    const prompt = `You are an expert Indian personal finance advisor. Analyse this ANONYMISED financial profile and give highly specific, actionable advice.
+
+ANONYMISED FINANCIAL PROFILE (no identifying information):
+- Income bracket: ${incomeBracket} per year (FY ${latestInc.financial_year})
+- Income sources: Salary${hasBonus ? ' + Bonus' : ''}${hasRental ? ' + Rental' : ''}${hasCapGains ? ' + Capital Gains' : ''}
+- Savings ratio: ${savRatio}% of annual income (annualised from monthly avg)
+- Expense ratio: ${expRatio}% of annual income (annualised)
+- Months of data: ${expenses.length} expense records, ${savings.length} savings records
+
+ML MODEL RESULTS (anonymous):
+- Expense trend: ${expLR.slope > 0 ? 'Increasing' : expLR.slope < 0 ? 'Decreasing' : 'Flat'} (R²=${expLR.r2.toFixed(2)}, model confidence: ${expLR.r2 >= 0.7 ? 'High' : expLR.r2 >= 0.4 ? 'Medium' : 'Low'})
+- Savings trend: ${savLR.slope > 0 ? 'Growing' : savLR.slope < 0 ? 'Declining' : 'Flat'} (R²=${savLR.r2.toFixed(2)}, model confidence: ${savLR.r2 >= 0.7 ? 'High' : savLR.r2 >= 0.4 ? 'Medium' : 'Low'})
+- Predicted next-month expenses vs average: ${nextExpense > avgExp ? Math.round((nextExpense/avgExp-1)*100) + '% above average' : Math.round((1-nextExpense/avgExp)*100) + '% below average'}
+- Projected annual savings vs income: ${((projAnnualSav / latestInc.total_income) * 100).toFixed(1)}% of income
+- Emergency fund ETA: ${etaMonths !== null ? etaMonths + ' months away' : 'Already achieved'}
+- Spending anomalies: ${allAnomalies.length} detected ${allAnomalies.length > 0 ? '(categories: ' + [...new Set(allAnomalies.map(a => a.cat))].join(', ') + ')' : ''}
+
+EXPENSE CATEGORY BREAKDOWN (% of total, no amounts):
+${catBreakdown.map(c => `- ${c.name}: ${c.pct}%`).join('\n')}
+
+Provide analysis in these exact sections using markdown:
+
+## 🔍 Financial Health Assessment
+[2-3 sentences on overall health. Use % ratios, not rupee amounts.]
+
+## 📈 Trend Analysis
+[What the ML R² scores and slopes mean for this person's trajectory.]
+
+## ⚠️ Key Risk Areas
+[Top 2-3 specific risks based on their ratios and trends.]
+
+## 🎯 Top 5 Action Items
+[Numbered, specific actions for this income bracket. Use % targets, not exact amounts.]
+
+## 💡 Smart Investment Suggestions
+[Specific Indian investment options suited to this income bracket — PPF, ELSS, NPS, SGB, etc.]
+
+## 🔮 12-Month Financial Forecast
+[Projected milestones based on current trends and ratios.]
+
+Be specific and actionable. Reference their actual ratios. Max 550 words.`;
+
+    try {
+        const claudeProxy = firebase.functions().httpsCallable('claudeProxy', { timeout: 60000 });
+        const result      = await claudeProxy({ prompt });
+        const text        = result.data?.text || 'Analysis unavailable.';
+
+        el.innerHTML = `
+            <div class="privacy-notice">
+                🔒 <strong>Privacy protected</strong> — Analysis generated from anonymised ratios only.
+                No exact income, expense amounts, or personal data was sent externally.
+            </div>
+            <div class="claude-output">${markdownToHtml(text)}</div>`;
+
+    } catch(e) {
+        el.innerHTML = `
+            <div class="claude-setup-guide">
+                <h4>🔧 One-time Setup Required</h4>
+                <p>The Claude AI analysis uses a secure Firebase Cloud Function to protect your privacy.
+                To enable it, deploy the included <code>functions/index.js</code> to your Firebase project:</p>
+                <div class="setup-steps">
+                    <div class="setup-step"><span class="step-num">1</span>
+                        <code>npm install -g firebase-tools</code>
+                    </div>
+                    <div class="setup-step"><span class="step-num">2</span>
+                        <code>firebase login</code>
+                    </div>
+                    <div class="setup-step"><span class="step-num">3</span>
+                        <code>firebase functions:config:set anthropic.key="YOUR_API_KEY"</code>
+                    </div>
+                    <div class="setup-step"><span class="step-num">4</span>
+                        <code>firebase deploy --only functions</code>
+                    </div>
+                </div>
+                <p class="setup-note">✅ All 5 ML predictions above are fully working and 100% private — they run entirely in your browser.</p>
+                <p class="setup-error">Error: ${e.message}</p>
+            </div>`;
+    }
+}
+
+/* ── BUG FIX: Corrected regex (was a literal newline, now proper escape) ── */
+function markdownToHtml(md) {
+    return md
+        .replace(/^## (.+)$/gm, '<h3 class="claude-h3">$1</h3>')
+        .replace(/^### (.+)$/gm, '<h4 class="claude-h4">$1</h4>')
+        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+        .replace(/^\d+\. (.+)$/gm, '<div class="claude-list-item"><span class="claude-num"></span>$1</div>')
+        .replace(/^- (.+)$/gm, '<div class="claude-bullet">$1</div>')
+        .replace(/\n\n/g, '<br>')
+        .replace(/₹([\d,]+)/g, '<span class="claude-rupee">₹$1</span>');
 }
