@@ -186,6 +186,12 @@
                 <span class="nav-label">Health Score</span>
                 <span class="nav-indicator"></span>
             </button>
+            <button class="nav-item" onclick="switchTab('ai',this)" data-tab="ai">
+                <span class="nav-icon">🤖</span>
+                <span class="nav-label">AI Predictions</span>
+                <span class="nav-indicator"></span>
+                <span class="nav-new-badge">NEW</span>
+            </button>
         </nav>
 
         <div class="sidebar-footer">
@@ -303,70 +309,206 @@
         <!-- INCOME TAB -->
         <div id="incomeTab" class="tab-content">
             <div class="grid-2">
+
+                <!-- ── Add / Update Income ── -->
                 <div class="card">
                     <div class="card-header"><span>💼 Add / Update Income</span></div>
                     <div class="form-grid">
+
                         <div class="form-group-inline">
-                            <label>Financial Year</label>
+                            <label class="tip-label">
+                                Financial Year
+                                <span class="tip-icon" data-tip="inc-fy">ℹ</span>
+                                <div class="tooltip" id="tip-inc-fy">
+                                    <div class="tt-title">📅 Financial Year</div>
+                                    <div class="tt-body">Enter the Indian financial year in format <strong>YYYY-YY</strong> (e.g. 2024-25). The Indian FY runs from <strong>1 April to 31 March</strong>.</div>
+                                </div>
+                            </label>
                             <input id="incYear" value="2024-25" class="inp">
                         </div>
+
                         <div class="form-group-inline">
-                            <label>Salary (₹)</label>
+                            <label class="tip-label">
+                                Salary (₹) <span class="period-badge badge-annual">Annual</span>
+                                <span class="tip-icon" data-tip="inc-sal">ℹ</span>
+                                <div class="tooltip" id="tip-inc-sal">
+                                    <div class="tt-title">💼 Gross Annual Salary</div>
+                                    <div class="tt-body">Enter your <strong>total annual CTC or gross salary</strong> before any deductions. Include basic pay, DA, HRA, and all allowances for the full year. Check Form 16 Part B.</div>
+                                    <div class="tt-example">Example: ₹12,00,000 per year</div>
+                                </div>
+                            </label>
+                            <div class="field-hint">Total yearly CTC / gross pay</div>
                             <input type="number" id="salary" placeholder="800000" class="inp">
                         </div>
+
                         <div class="form-group-inline">
-                            <label>Bonus (₹)</label>
+                            <label class="tip-label">
+                                Bonus (₹) <span class="period-badge badge-lumpsum">Lump-sum</span>
+                                <span class="tip-icon" data-tip="inc-bon">ℹ</span>
+                                <div class="tooltip" id="tip-inc-bon">
+                                    <div class="tt-title">🎯 Performance Bonus</div>
+                                    <div class="tt-body">Any <strong>performance bonus, joining bonus, or incentive</strong> received during the year. These are fully taxable as salary income. Include all bonuses received in this FY.</div>
+                                    <div class="tt-example">Example: ₹1,50,000 one-time bonus</div>
+                                </div>
+                            </label>
+                            <div class="field-hint">One-time / annual performance bonus</div>
                             <input type="number" id="bonus" value="0" class="inp">
                         </div>
+
                         <div class="form-group-inline">
-                            <label>Rental Income (₹)</label>
+                            <label class="tip-label">
+                                Rental Income (₹) <span class="period-badge badge-annual">Annual</span>
+                                <span class="tip-icon" data-tip="inc-rent">ℹ</span>
+                                <div class="tooltip" id="tip-inc-rent">
+                                    <div class="tt-title">🏠 Annual Rental Income</div>
+                                    <div class="tt-body">Total annual rent received from any property you own. A <strong>30% standard deduction</strong> on net rental income is allowed under Section 24(a) — but enter the gross annual rent here.</div>
+                                    <div class="tt-example">Example: ₹2,40,000 (₹20,000/month × 12)</div>
+                                </div>
+                            </label>
+                            <div class="field-hint">Total rent received for the full year</div>
                             <input type="number" id="rental" value="0" class="inp">
                         </div>
+
                         <div class="form-group-inline">
-                            <label>Capital Gains (₹)</label>
+                            <label class="tip-label">
+                                Capital Gains (₹) <span class="period-badge badge-lumpsum">Lump-sum</span>
+                                <span class="tip-icon" data-tip="inc-cg">ℹ</span>
+                                <div class="tooltip" id="tip-inc-cg">
+                                    <div class="tt-title">📈 Capital Gains</div>
+                                    <div class="tt-body">Profit from selling <strong>stocks, mutual funds, property, or gold</strong>. Short-term gains (held &lt;1 year) taxed at <strong>20%</strong>; long-term gains above ₹1.25L taxed at <strong>12.5%</strong>. Enter total gains here.</div>
+                                    <div class="tt-example">Example: ₹80,000 from mutual fund redemption</div>
+                                </div>
+                            </label>
+                            <div class="field-hint">Profit from selling assets (stocks, MF, property)</div>
                             <input type="number" id="capgains" value="0" class="inp">
                         </div>
+
                         <div class="form-group-inline">
-                            <label>Other Income (₹)</label>
+                            <label class="tip-label">
+                                Other Income (₹) <span class="period-badge badge-annual">Annual</span>
+                                <span class="tip-icon" data-tip="inc-oth">ℹ</span>
+                                <div class="tooltip" id="tip-inc-oth">
+                                    <div class="tt-title">💡 Other Annual Income</div>
+                                    <div class="tt-body">Include: <strong>bank FD interest, savings account interest, freelance income, dividends, gifts above ₹50,000,</strong> or any other income not covered above. All taxable under "Income from Other Sources".</div>
+                                    <div class="tt-example">Example: ₹45,000 (FD interest for the year)</div>
+                                </div>
+                            </label>
+                            <div class="field-hint">FD interest, freelance, dividends, etc. for year</div>
                             <input type="number" id="otherinc" value="0" class="inp">
                         </div>
+
                     </div>
                     <button class="btn-action" onclick="saveIncome()">💾 Save Income</button>
                 </div>
+
+                <!-- ── Tax Deductions ── -->
                 <div class="card">
                     <div class="card-header"><span>📋 Tax Deductions</span></div>
                     <div class="form-grid">
+
                         <div class="form-group-inline">
-                            <label>Section 80C (₹)</label>
+                            <label class="tip-label">
+                                Section 80C (₹) <span class="period-badge badge-annual">Annual</span>
+                                <span class="tip-icon" data-tip="ded-80c">ℹ</span>
+                                <div class="tooltip" id="tip-ded-80c">
+                                    <div class="tt-title">🔒 Section 80C — Max ₹1,50,000</div>
+                                    <div class="tt-body">Covers: <strong>EPF, PPF, ELSS mutual funds, LIC premium, NSC, 5-year FD, tuition fees, home loan principal repayment, Sukanya Samriddhi.</strong></div>
+                                    <div class="tt-limit">⚠️ Maximum limit: ₹1,50,000/year</div>
+                                    <div class="tt-example">Tip: Invest in ELSS for tax saving + market returns</div>
+                                </div>
+                            </label>
+                            <div class="field-hint">EPF, PPF, ELSS, LIC, NSC — max ₹1.5L/year</div>
                             <input type="number" id="d80c" value="0" class="inp">
                         </div>
+
                         <div class="form-group-inline">
-                            <label>Section 80D (₹)</label>
+                            <label class="tip-label">
+                                Section 80D (₹) <span class="period-badge badge-annual">Annual</span>
+                                <span class="tip-icon" data-tip="ded-80d">ℹ</span>
+                                <div class="tooltip" id="tip-ded-80d">
+                                    <div class="tt-title">🏥 Section 80D — Health Insurance</div>
+                                    <div class="tt-body">Deduction for <strong>health insurance premiums</strong> paid for yourself, spouse, children, and parents. Includes preventive health check-up costs up to ₹5,000.</div>
+                                    <div class="tt-limit">⚠️ Self+family: ₹25,000 | Senior citizen parents: +₹50,000</div>
+                                    <div class="tt-example">Total max: ₹75,000 if parents are senior citizens</div>
+                                </div>
+                            </label>
+                            <div class="field-hint">Annual health insurance premium paid</div>
                             <input type="number" id="d80d" value="0" class="inp">
                         </div>
+
                         <div class="form-group-inline">
-                            <label>Section 80G (₹)</label>
+                            <label class="tip-label">
+                                Section 80G (₹) <span class="period-badge badge-lumpsum">Lump-sum</span>
+                                <span class="tip-icon" data-tip="ded-80g">ℹ</span>
+                                <div class="tooltip" id="tip-ded-80g">
+                                    <div class="tt-title">🤝 Section 80G — Donations</div>
+                                    <div class="tt-body">Deduction for <strong>donations to approved charitable organisations</strong> (e.g. PM Relief Fund, CRY, temples, NGOs). Some donations qualify for <strong>100% deduction</strong>, others for <strong>50%</strong>.</div>
+                                    <div class="tt-example">Tip: Always get an 80G receipt from the organisation</div>
+                                </div>
+                            </label>
+                            <div class="field-hint">Donations to approved charities / NGOs</div>
                             <input type="number" id="d80g" value="0" class="inp">
                         </div>
+
                         <div class="form-group-inline">
-                            <label>Home Loan Interest (₹)</label>
+                            <label class="tip-label">
+                                Home Loan Interest (₹) <span class="period-badge badge-annual">Annual</span>
+                                <span class="tip-icon" data-tip="ded-24">ℹ</span>
+                                <div class="tooltip" id="tip-ded-24">
+                                    <div class="tt-title">🏡 Section 24(b) — Home Loan Interest</div>
+                                    <div class="tt-body">Deduction on <strong>annual interest paid on home loan</strong> for a self-occupied property. If the property is let out, the entire interest is deductible. Check your loan statement for annual interest paid.</div>
+                                    <div class="tt-limit">⚠️ Self-occupied: Max ₹2,00,000/year</div>
+                                    <div class="tt-example">Example: ₹1,80,000 interest paid this year</div>
+                                </div>
+                            </label>
+                            <div class="field-hint">Annual home loan interest paid — max ₹2L</div>
                             <input type="number" id="d24" value="0" class="inp">
                         </div>
+
                         <div class="form-group-inline">
-                            <label>NPS 80CCD (₹)</label>
+                            <label class="tip-label">
+                                NPS 80CCD (₹) <span class="period-badge badge-annual">Annual</span>
+                                <span class="tip-icon" data-tip="ded-nps">ℹ</span>
+                                <div class="tooltip" id="tip-ded-nps">
+                                    <div class="tt-title">🏛️ Section 80CCD(1B) — NPS</div>
+                                    <div class="tt-body">Additional deduction for annual contributions to <strong>National Pension Scheme (NPS) Tier-1</strong> account. This is <strong>over and above</strong> the ₹1.5L limit of 80C.</div>
+                                    <div class="tt-limit">⚠️ Extra limit: ₹50,000/year (on top of 80C)</div>
+                                    <div class="tt-example">Tip: Great for long-term retirement planning + tax saving</div>
+                                </div>
+                            </label>
+                            <div class="field-hint">Annual NPS Tier-1 contribution — max ₹50K extra</div>
                             <input type="number" id="dnps" value="0" class="inp">
                         </div>
+
                         <div class="form-group-inline">
-                            <label>HRA Exemption (₹)</label>
+                            <label class="tip-label">
+                                HRA Exemption (₹) <span class="period-badge badge-annual">Annual</span>
+                                <span class="tip-icon" data-tip="ded-hra">ℹ</span>
+                                <div class="tooltip" id="tip-ded-hra">
+                                    <div class="tt-title">🏘️ HRA — House Rent Allowance</div>
+                                    <div class="tt-body">If you receive HRA from your employer and pay rent, a portion is <strong>exempt from tax</strong>. Exemption is the <em>least</em> of: actual HRA received, 50% of salary (metro) / 40% (non-metro), or rent paid minus 10% of salary.</div>
+                                    <div class="tt-example">Tip: Submit rent receipts + landlord PAN to employer</div>
+                                </div>
+                            </label>
+                            <div class="field-hint">Annual HRA exempt portion (check Form 16)</div>
                             <input type="number" id="dhra" value="0" class="inp">
                         </div>
+
                     </div>
                     <button class="btn-action" onclick="saveDeductions()">💾 Save Deductions</button>
                 </div>
             </div>
+
+            <!-- ── Saved Income Records ── -->
             <div class="card">
                 <div class="card-header"><span>📑 Saved Income Records</span></div>
                 <div id="incomeTable" class="loading-state"><div class="skeleton"></div></div>
+            </div>
+
+            <!-- ── Saved Tax Deduction Records ── -->
+            <div class="card">
+                <div class="card-header"><span>📋 Saved Tax Deduction Records</span></div>
+                <div id="deductionTable" class="loading-state"><div class="skeleton"></div></div>
             </div>
         </div>
 
@@ -376,35 +518,92 @@
                 <div class="card-header"><span>🧾 Add Monthly Expenses</span></div>
                 <div class="form-grid-3">
                     <div class="form-group-inline">
-                        <label>Month-Year (YYYY-MM)</label>
+                        <label class="tip-label">
+                            Month-Year (YYYY-MM)
+                            <span class="tip-icon" data-tip="exp-mo">ℹ</span>
+                            <div class="tooltip" id="tip-exp-mo">
+                                <div class="tt-title">📅 Month-Year Format</div>
+                                <div class="tt-body">Enter the month in <strong>YYYY-MM</strong> format. This is used as the unique record ID — entering the same month again will <strong>update</strong> the existing record.</div>
+                                <div class="tt-example">Example: 2024-12 for December 2024</div>
+                            </div>
+                        </label>
                         <input id="expMonth" placeholder="2024-12" class="inp">
                     </div>
                     <div class="form-group-inline">
-                        <label>Rent (₹)</label>
+                        <label class="tip-label">
+                            Rent (₹)
+                            <span class="tip-icon" data-tip="exp-rent">ℹ</span>
+                            <div class="tooltip" id="tip-exp-rent">
+                                <div class="tt-title">🏠 Monthly Rent</div>
+                                <div class="tt-body">Total rent paid for your home this month. If you own your home, enter 0. <strong>Tip:</strong> Keep rent receipts for HRA exemption claims with your employer.</div>
+                            </div>
+                        </label>
                         <input type="number" id="eRent" value="0" class="inp">
                     </div>
                     <div class="form-group-inline">
-                        <label>Groceries (₹)</label>
+                        <label class="tip-label">
+                            Groceries (₹)
+                            <span class="tip-icon" data-tip="exp-groc">ℹ</span>
+                            <div class="tooltip" id="tip-exp-groc">
+                                <div class="tt-title">🛒 Groceries & Food</div>
+                                <div class="tt-body">Monthly spend on <strong>supermarket, vegetables, dairy, eating out, food delivery</strong> (Zomato/Swiggy), and all food-related expenses. Aim to keep this under <strong>15% of monthly income</strong> for healthy finances.</div>
+                            </div>
+                        </label>
                         <input type="number" id="eGrocery" value="0" class="inp">
                     </div>
                     <div class="form-group-inline">
-                        <label>Utilities (₹)</label>
+                        <label class="tip-label">
+                            Utilities (₹)
+                            <span class="tip-icon" data-tip="exp-util">ℹ</span>
+                            <div class="tooltip" id="tip-exp-util">
+                                <div class="tt-title">⚡ Utilities</div>
+                                <div class="tt-body">Monthly bills for <strong>electricity, water, gas (LPG), internet, mobile recharge, OTT subscriptions</strong> (Netflix, Prime, etc.), and any other recurring household services.</div>
+                            </div>
+                        </label>
                         <input type="number" id="eUtil" value="0" class="inp">
                     </div>
                     <div class="form-group-inline">
-                        <label>Transportation (₹)</label>
+                        <label class="tip-label">
+                            Transportation (₹)
+                            <span class="tip-icon" data-tip="exp-trans">ℹ</span>
+                            <div class="tooltip" id="tip-exp-trans">
+                                <div class="tt-title">🚗 Transportation</div>
+                                <div class="tt-body">All commute costs including <strong>fuel, Ola/Uber, metro/bus passes, vehicle EMI, parking, vehicle maintenance,</strong> and toll charges.</div>
+                            </div>
+                        </label>
                         <input type="number" id="eTrans" value="0" class="inp">
                     </div>
                     <div class="form-group-inline">
-                        <label>Entertainment (₹)</label>
+                        <label class="tip-label">
+                            Entertainment (₹)
+                            <span class="tip-icon" data-tip="exp-ent">ℹ</span>
+                            <div class="tooltip" id="tip-exp-ent">
+                                <div class="tt-title">🎬 Entertainment & Leisure</div>
+                                <div class="tt-body">Spending on <strong>movies, concerts, dining out, weekend trips, hobbies, shopping</strong> (non-essential), and social outings. Financial advisors suggest capping this at <strong>10% of monthly income</strong>.</div>
+                            </div>
+                        </label>
                         <input type="number" id="eEnt" value="0" class="inp">
                     </div>
                     <div class="form-group-inline">
-                        <label>Healthcare (₹)</label>
+                        <label class="tip-label">
+                            Healthcare (₹)
+                            <span class="tip-icon" data-tip="exp-health">ℹ</span>
+                            <div class="tooltip" id="tip-exp-health">
+                                <div class="tt-title">💊 Healthcare</div>
+                                <div class="tt-body">Monthly spend on <strong>medicines, doctor consultations, lab tests, dental/optical</strong> care, gym membership, and health insurance premiums (if not auto-debited). Preventive check-ups up to ₹5,000 qualify for <strong>80D deduction</strong>.</div>
+                            </div>
+                        </label>
                         <input type="number" id="eHealth" value="0" class="inp">
                     </div>
                     <div class="form-group-inline">
-                        <label>Education (₹)</label>
+                        <label class="tip-label">
+                            Education (₹)
+                            <span class="tip-icon" data-tip="exp-edu">ℹ</span>
+                            <div class="tooltip" id="tip-exp-edu">
+                                <div class="tt-title">📚 Education</div>
+                                <div class="tt-body">Costs for <strong>school/college fees, coaching classes, online courses, books, stationery,</strong> or any skill development. Tuition fees for children (up to 2) are deductible under <strong>Section 80C</strong>.</div>
+                            </div>
+                        </label>
                         <input type="number" id="eEdu" value="0" class="inp">
                     </div>
                 </div>
@@ -422,31 +621,87 @@
                 <div class="card-header"><span>🏦 Add Monthly Savings</span></div>
                 <div class="form-grid-3">
                     <div class="form-group-inline">
-                        <label>Month-Year (YYYY-MM)</label>
+                        <label class="tip-label">
+                            Month-Year (YYYY-MM)
+                            <span class="tip-icon" data-tip="sav-mo">ℹ</span>
+                            <div class="tooltip" id="tip-sav-mo">
+                                <div class="tt-title">📅 Month-Year Format</div>
+                                <div class="tt-body">Enter in <strong>YYYY-MM</strong> format. Entering the same month again will <strong>update</strong> (not duplicate) the record.</div>
+                                <div class="tt-example">Example: 2024-12 for December 2024</div>
+                            </div>
+                        </label>
                         <input id="savMonth" placeholder="2024-12" class="inp">
                     </div>
                     <div class="form-group-inline">
-                        <label>Fixed Deposits (₹)</label>
+                        <label class="tip-label">
+                            Fixed Deposits (₹)
+                            <span class="tip-icon" data-tip="sav-fd">ℹ</span>
+                            <div class="tooltip" id="tip-sav-fd">
+                                <div class="tt-title">🏦 Fixed Deposits (FD)</div>
+                                <div class="tt-body">Amount invested in <strong>bank FDs or post office time deposits</strong> this month. FDs offer guaranteed returns (6–7.5% p.a.). Note: FD interest is <strong>fully taxable</strong>. 5-year FDs qualify for 80C deduction.</div>
+                                <div class="tt-example">Safe, low-risk. Best for emergency corpus.</div>
+                            </div>
+                        </label>
                         <input type="number" id="sFD" value="0" class="inp">
                     </div>
                     <div class="form-group-inline">
-                        <label>Mutual Funds (₹)</label>
+                        <label class="tip-label">
+                            Mutual Funds (₹)
+                            <span class="tip-icon" data-tip="sav-mf">ℹ</span>
+                            <div class="tooltip" id="tip-sav-mf">
+                                <div class="tt-title">📊 Mutual Funds / SIP</div>
+                                <div class="tt-body">Monthly SIP amount or lump-sum invested in <strong>equity, debt, hybrid, or ELSS mutual funds</strong>. ELSS funds also give <strong>Section 80C</strong> benefit.</div>
+                                <div class="tt-example">Tip: Start a SIP — even ₹500/month compounds significantly!</div>
+                            </div>
+                        </label>
                         <input type="number" id="sMF" value="0" class="inp">
                     </div>
                     <div class="form-group-inline">
-                        <label>PPF (₹)</label>
+                        <label class="tip-label">
+                            PPF (₹)
+                            <span class="tip-icon" data-tip="sav-ppf">ℹ</span>
+                            <div class="tooltip" id="tip-sav-ppf">
+                                <div class="tt-title">🏛️ Public Provident Fund (PPF)</div>
+                                <div class="tt-body">Government-backed savings scheme with <strong>7.1% tax-free interest</strong>. Contributions qualify for <strong>Section 80C</strong>. Lock-in period: 15 years.</div>
+                                <div class="tt-limit">Min ₹500 | Max ₹1,50,000 per year</div>
+                            </div>
+                        </label>
                         <input type="number" id="sPPF" value="0" class="inp">
                     </div>
                     <div class="form-group-inline">
-                        <label>Stocks (₹)</label>
+                        <label class="tip-label">
+                            Stocks (₹)
+                            <span class="tip-icon" data-tip="sav-stk">ℹ</span>
+                            <div class="tooltip" id="tip-sav-stk">
+                                <div class="tt-title">📈 Direct Stocks</div>
+                                <div class="tt-body">Amount invested directly in <strong>NSE/BSE listed equities</strong> via Zerodha, Groww, etc. High risk, high reward. Long-term gains (1+ year) above ₹1.25L taxed at <strong>12.5%</strong>.</div>
+                                <div class="tt-example">Tip: Diversify across sectors to reduce risk.</div>
+                            </div>
+                        </label>
                         <input type="number" id="sStocks" value="0" class="inp">
                     </div>
                     <div class="form-group-inline">
-                        <label>Gold (₹)</label>
+                        <label class="tip-label">
+                            Gold (₹)
+                            <span class="tip-icon" data-tip="sav-gold">ℹ</span>
+                            <div class="tooltip" id="tip-sav-gold">
+                                <div class="tt-title">🥇 Gold Investment</div>
+                                <div class="tt-body">Investment in <strong>physical gold, Sovereign Gold Bonds (SGB), Gold ETFs, or digital gold</strong>. SGBs earn 2.5% annual interest + capital appreciation + tax-free maturity.</div>
+                                <div class="tt-example">Tip: SGBs are the best way to invest in gold tax-efficiently.</div>
+                            </div>
+                        </label>
                         <input type="number" id="sGold" value="0" class="inp">
                     </div>
                     <div class="form-group-inline">
-                        <label>Emergency Fund (₹)</label>
+                        <label class="tip-label">
+                            Emergency Fund (₹)
+                            <span class="tip-icon" data-tip="sav-emg">ℹ</span>
+                            <div class="tooltip" id="tip-sav-emg">
+                                <div class="tt-title">🚨 Emergency Fund</div>
+                                <div class="tt-body">Money set aside in a <strong>liquid account (savings/liquid fund)</strong> for emergencies like job loss, medical bills, or urgent repairs. Recommend <strong>3–6 months of expenses</strong> as your emergency corpus.</div>
+                                <div class="tt-example">Goal: ₹3L–₹5L if monthly expenses are ~₹50,000</div>
+                            </div>
+                        </label>
                         <input type="number" id="sEmerg" value="0" class="inp">
                     </div>
                 </div>
@@ -483,6 +738,98 @@
             </div>
         </div>
 
+        <!-- AI PREDICTIONS TAB -->
+        <div id="aiTab" class="tab-content">
+
+            <!-- Prediction Control Panel -->
+            <div class="card ai-hero-card">
+                <div class="ai-hero-header">
+                    <div class="ai-hero-icon">🤖</div>
+                    <div>
+                        <h2 class="ai-hero-title">AI Financial Predictions</h2>
+                        <p class="ai-hero-sub">Powered by statistical ML models + Claude AI · Analyses all your financial data</p>
+                    </div>
+                    <button class="btn-ai-run" id="btnRunAI" onclick="runAIPredictions()">
+                        <span id="btnAILabel">▶ Run Full Analysis</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Prediction Cards Row -->
+            <div class="ai-cards-grid" id="aiCardsGrid">
+                <div class="ai-pred-card" id="predExpense">
+                    <div class="ai-card-icon">📊</div>
+                    <div class="ai-card-label">Next Month Expenses</div>
+                    <div class="ai-card-val" id="predExpenseVal">—</div>
+                    <div class="ai-card-sub" id="predExpenseSub">Run analysis to predict</div>
+                    <div class="ai-card-trend" id="predExpenseTrend"></div>
+                </div>
+                <div class="ai-pred-card" id="predSavings">
+                    <div class="ai-card-icon">💰</div>
+                    <div class="ai-card-label">Projected Annual Savings</div>
+                    <div class="ai-card-val" id="predSavingsVal">—</div>
+                    <div class="ai-card-sub" id="predSavingsSub">Run analysis to predict</div>
+                    <div class="ai-card-trend" id="predSavingsTrend"></div>
+                </div>
+                <div class="ai-pred-card" id="predGoal">
+                    <div class="ai-card-icon">🎯</div>
+                    <div class="ai-card-label">Savings Goal ETA</div>
+                    <div class="ai-card-val" id="predGoalVal">—</div>
+                    <div class="ai-card-sub" id="predGoalSub">Run analysis to predict</div>
+                    <div class="ai-card-trend" id="predGoalTrend"></div>
+                </div>
+                <div class="ai-pred-card" id="predAnomaly">
+                    <div class="ai-card-icon">🔍</div>
+                    <div class="ai-card-label">Spending Anomalies</div>
+                    <div class="ai-card-val" id="predAnomalyVal">—</div>
+                    <div class="ai-card-sub" id="predAnomalySub">Run analysis to detect</div>
+                    <div class="ai-card-trend" id="predAnomalyTrend"></div>
+                </div>
+            </div>
+
+            <!-- 6-Month Forecast Chart -->
+            <div class="card" id="forecastChartCard" style="display:none">
+                <div class="card-header">
+                    <span>📈 6-Month Expense & Savings Forecast</span>
+                    <span class="card-badge">ML Model</span>
+                </div>
+                <div class="forecast-legend">
+                    <span class="legend-dot" style="background:#FF4F6B"></span> Predicted Expenses
+                    <span class="legend-dot" style="background:#10D48E;margin-left:16px"></span> Predicted Savings
+                    <span class="legend-dot" style="background:rgba(108,99,255,.5);margin-left:16px"></span> Confidence Band
+                </div>
+                <canvas id="forecastChart" height="280"></canvas>
+            </div>
+
+            <!-- Category Breakdown Prediction -->
+            <div class="card" id="categoryPredCard" style="display:none">
+                <div class="card-header"><span>🧾 Predicted Category Breakdown — Next Month</span></div>
+                <div id="categoryPredContent"></div>
+            </div>
+
+            <!-- Anomaly Detection -->
+            <div class="card" id="anomalyCard" style="display:none">
+                <div class="card-header"><span>⚠️ Anomaly Detection Report</span></div>
+                <div id="anomalyContent"></div>
+            </div>
+
+            <!-- Claude AI Deep Analysis -->
+            <div class="card" id="claudeAnalysisCard" style="display:none">
+                <div class="card-header">
+                    <span>🧠 Claude AI — Deep Financial Analysis</span>
+                    <span class="card-badge">AI Powered</span>
+                </div>
+                <div id="claudeAnalysisContent">
+                    <div class="claude-thinking">
+                        <div class="claude-pulse"></div>
+                        <span>Claude is analysing your financial data…</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <!-- END AI TAB -->
+
     </main>
 </div>
 
@@ -493,6 +840,8 @@
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-functions-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script src="app.js"></script>
 
 </body>
