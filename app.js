@@ -749,15 +749,22 @@ async function calcHealth() {
         const savRatio  = annualInc > 0 ? (annualSav / annualInc) * 100 : 0;
         const expRatio  = annualInc > 0 ? (annualExp / annualInc) * 100 : 0;
 
-        const savScore = Math.min(40, savRatio * 2);
-        const expScore = expRatio <= 50 ? 40 : Math.max(0, 40 - (expRatio - 50));
-        const divScore = savings.length > 0 ? Math.min(20,
-            [s => s.fixed_deposits, s => s.mutual_funds, s => s.ppf,
-             s => s.stocks, s => s.gold, s => s.emergency_fund]
-            .filter(fn => savings.some(s => fn(s) > 0)).length * (20 / 6)
-        ) : 0;
+        const response = await fetch("http://localhost:8000/predict-health", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+            annual_income: annualInc,
+            annual_expenses: annualExp,
+            total_savings: totalSav,
+            savings_ratio: savRatio,
+            expense_ratio: expRatio
+        })
+    });
 
-        const overall = Math.min(100, Math.round(savScore + expScore + divScore));
+const ml = await response.json();
+const overall = ml.health_score;
         const cat = overall >= 80 ? '🌟 Excellent' : overall >= 60 ? '😊 Good' : overall >= 40 ? '😐 Fair' : '⚠️ Needs Attention';
         const catColor = overall >= 80 ? 'var(--green)' : overall >= 60 ? '#6C63FF' : overall >= 40 ? 'var(--yellow)' : 'var(--red)';
 
