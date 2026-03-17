@@ -749,7 +749,7 @@ async function calcHealth() {
         const savRatio  = annualInc > 0 ? (annualSav / annualInc) * 100 : 0;
         const expRatio  = annualInc > 0 ? (annualExp / annualInc) * 100 : 0;
 
-        const response = await fetch("http://13.60.249.215:8000/score", {
+        const response = await fetch("localhost:8000/score", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
