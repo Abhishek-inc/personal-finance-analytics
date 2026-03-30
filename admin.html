@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FinanceHub — Admin Panel</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="admin.css">
+
+    <style>
+        /* Inline SVG icon sizing utility */
+        .icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .icon svg {
+            width: 1em;
+            height: 1em;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 1.75;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            vertical-align: middle;
+        }
+        /* Stat card icons use a slightly larger size */
+        .admin-stat-icon .icon svg {
+            width: 1.5em;
+            height: 1.5em;
+        }
+        /* Nav item icon */
+        .admin-nav-item .icon svg {
+            width: 1.1em;
+            height: 1.1em;
+        }
+    </style>
+</head>
+<body>
+
+<!-- ═══ AUTH GATE ════════════════════════════════════════════ -->
+<div id="adminAuthGate" class="admin-auth-gate">
+    <div class="admin-auth-box">
+
+        <!-- Shield icon replacing 🛡️ -->
+        <div class="admin-auth-icon">
+            <span class="icon">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                </svg>
+            </span>
+        </div>
+
+        <h2 class="admin-auth-title">Admin Access</h2>
+        <p class="admin-auth-sub">Sign in with your admin account</p>
+        <div id="adminAlertBox"></div>
+
+        <div class="form-group floating">
+            <input type="email" id="adminEmail" placeholder=" " autocomplete="email">
+            <label>Admin Email</label>
+            <!-- Mail icon replacing ✉️ -->
+            <span class="field-icon icon">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="2" y="4" width="20" height="16" rx="2"/>
+                    <polyline points="2,4 12,13 22,4"/>
+                </svg>
+            </span>
+        </div>
+
+        <div class="form-group floating">
+            <input type="password" id="adminPassword" placeholder=" " autocomplete="current-password">
+            <label>Password</label>
+            <!-- Eye icon replacing 👁️ -->
+            <span class="field-icon icon" id="toggleAdminPass" onclick="toggleAdminPass()">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                    <circle cx="12" cy="12" r="3"/>
+                </svg>
+            </span>
+        </div>
+
+        <button class="btn-submit" id="adminLoginBtn" onclick="handleAdminLogin()">
+            <span>Access Admin Panel</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </button>
+
+        <p style="text-align:center;margin-top:16px;font-size:.8rem;color:var(--text-muted)">
+            Not an admin? <a href="index.html" style="color:var(--accent)">Go to main app</a>
+        </p>
+    </div>
+</div>
+
+<!-- ═══ ADMIN DASHBOARD ══════════════════════════════════════ -->
+<div id="adminDashboard" class="admin-dashboard hidden">
+
+    <!-- Top Bar -->
+    <div class="admin-topbar">
+        <div class="admin-brand">
+            <!-- Shield brand icon replacing 🛡️ -->
+            <span class="admin-shield icon">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                </svg>
+            </span>
+            <span>FinanceHub <strong>Admin</strong></span>
+        </div>
+        <div class="admin-topbar-right">
+            <span class="admin-badge">Administrator</span>
+            <span id="adminUserEmail" style="font-size:.82rem;color:var(--text-muted)"></span>
+            <button class="btn-logout" onclick="handleAdminLogout()" title="Logout" style="margin-left:8px">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                    <polyline points="16 17 21 12 16 7"/>
+                    <line x1="21" y1="12" x2="9" y2="12"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- Main -->
+    <div class="admin-main">
+
+        <!-- Sidebar -->
+        <aside class="admin-sidebar">
+            <nav class="admin-nav">
+
+                <!-- Overview — bar-chart icon replacing 📊 -->
+                <button class="admin-nav-item active" onclick="adminSwitchTab('overview', this)">
+                    <span class="icon">
+                        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <rect x="3" y="12" width="4" height="9"/><rect x="10" y="7" width="4" height="14"/><rect x="17" y="3" width="4" height="18"/>
+                        </svg>
+                    </span>
+                    Overview
+                </button>
+
+                <!-- All Users — users icon replacing 👥 -->
+                <button class="admin-nav-item" onclick="adminSwitchTab('users', this)">
+                    <span class="icon">
+                        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                            <circle cx="9" cy="7" r="4"/>
+                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                        </svg>
+                    </span>
+                    All Users
+                </button>
+
+                <!-- Financials — dollar-sign icon replacing 💰 -->
+                <button class="admin-nav-item" onclick="adminSwitchTab('finances', this)">
+                    <span class="icon">
+                        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <rect x="2" y="7" width="20" height="14" rx="2"/>
+                            <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/>
+                            <line x1="12" y1="12" x2="12" y2="16"/>
+                            <line x1="10" y1="14" x2="14" y2="14"/>
+                        </svg>
+                    </span>
+                    Financials
+                </button>
+
+                <!-- Health Scores — activity icon replacing 💡 -->
+                <button class="admin-nav-item" onclick="adminSwitchTab('health', this)">
+                    <span class="icon">
+                        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                        </svg>
+                    </span>
+                    Health Scores
+                </button>
+
+                <!-- Export — download icon replacing 📥 -->
+                <button class="admin-nav-item" onclick="adminSwitchTab('export', this)">
+                    <span class="icon">
+                        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                            <polyline points="7 10 12 15 17 10"/>
+                            <line x1="12" y1="15" x2="12" y2="3"/>
+                        </svg>
+                    </span>
+                    Export Data
+                </button>
+
+            </nav>
+        </aside>
+
+        <!-- Content -->
+        <main class="admin-content">
+
+            <!-- OVERVIEW TAB -->
+            <div id="overviewTab" class="admin-tab active">
+                <div class="admin-page-header">
+                    <h1>
+                        <span class="icon">
+                            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style="width:1.2em;height:1.2em">
+                                <rect x="3" y="12" width="4" height="9"/><rect x="10" y="7" width="4" height="14"/><rect x="17" y="3" width="4" height="18"/>
+                            </svg>
+                        </span>
+                        Dashboard Overview
+                    </h1>
+                    <button class="btn-action" onclick="loadAllAdminData()">
+                        <!-- Refresh icon replacing 🔄 -->
+                        <span class="icon">
+                            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <polyline points="23 4 23 10 17 10"/>
+                                <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+                            </svg>
+                        </span>
+                        Refresh
+                    </button>
+                </div>
+
+                <!-- Stat Cards -->
+                <div class="admin-stats-grid">
+
+                    <div class="admin-stat-card">
+                        <div class="admin-stat-icon icon">
+                            <!-- Users icon replacing 👥 -->
+                            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                                <circle cx="9" cy="7" r="4"/>
+                                <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                            </svg>
+                        </div>
+                        <div class="admin-stat-body">
+                            <span class="admin-stat-label">Total Users</span>
+                            <span class="admin-stat-val" id="statTotalUsers">—</span>
+                        </div>
+                    </div>
+
+                    <div class="admin-stat-card">
+                        <div class="admin-stat-icon icon">
+                            <!-- Briefcase icon replacing 💼 -->
+                            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <rect x="2" y="7" width="20" height="14" rx="2"/>
+                                <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/>
+                            </svg>
+                        </div>
+                        <div class="admin-stat-body">
+                            <span class="admin-stat-label">Total Income Recorded</span>
+                            <span class="admin-stat-val" id="statTotalIncome">—</span>
+                        </div>
+                    </div>
+
+                    <div class="admin-stat-card">
+                        <div class="admin-stat-icon icon">
+                            <!-- Receipt icon replacing 🧾 -->
+                            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16l3-2 2 2 2-2 2 2 2-2 3 2V4a2 2 0 0 0-2-2z"/>
+                                <line x1="9" y1="9" x2="15" y2="9"/>
+                                <line x1="9" y1="13" x2="15" y2="13"/>
+                            </svg>
+                        </div>
+                        <div class="admin-stat-body">
+                            <span class="admin-stat-label">Avg Monthly Expense</span>
+                            <span class="admin-stat-val" id="statAvgExpense">—</span>
+                        </div>
+                    </div>
+
+                    <div class="admin-stat-card accent">
+                        <div class="admin-stat-icon icon">
+                            <!-- Activity / health icon replacing 💡 -->
+                            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                            </svg>
+                        </div>
+                        <div class="admin-stat-body">
+                            <span class="admin-stat-label">Avg Health Score</span>
+                            <span class="admin-stat-val" id="statAvgHealth">—</span>
+                        </div>
+                    </div>
+
+                    <div class="admin-stat-card">
+                        <div class="admin-stat-icon icon">
+                            <!-- Bank / savings icon replacing 🏦 -->
+                            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <polyline points="3 9 12 2 21 9"/>
+                                <rect x="3" y="9" width="18" height="11" rx="1"/>
+                                <line x1="3" y1="20" x2="21" y2="20"/>
+                                <line x1="7" y1="12" x2="7" y2="17"/>
+                                <line x1="12" y1="12" x2="12" y2="17"/>
+                                <line x1="17" y1="12" x2="17" y2="17"/>
+                            </svg>
+                        </div>
+                        <div class="admin-stat-body">
+                            <span class="admin-stat-label">Total Savings Recorded</span>
+                            <span class="admin-stat-val" id="statTotalSavings">—</span>
+                        </div>
+                    </div>
+
+                    <div class="admin-stat-card">
+                        <div class="admin-stat-icon icon">
+                            <!-- Clipboard icon replacing 📋 -->
+                            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
+                                <rect x="8" y="2" width="8" height="4" rx="1"/>
+                                <line x1="9" y1="12" x2="15" y2="12"/>
+                                <line x1="9" y1="16" x2="13" y2="16"/>
+                            </svg>
+                        </div>
+                        <div class="admin-stat-body">
+                            <span class="admin-stat-label">Total Expense Records</span>
+                            <span class="admin-stat-val" id="statTotalExpRecords">—</span>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Recent Activity -->
+                <div class="card" style="margin-top:24px">
+                    <div class="card-header">
+                        <span>
+                            <!-- Clock icon replacing 🕒 -->
+                            <span class="icon">
+                                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <circle cx="12" cy="12" r="10"/>
+                                    <polyline points="12 6 12 12 16 14"/>
+                                </svg>
+                            </span>
+                            Recently Joined Users
+                        </span>
+                    </div>
+                    <div id="recentUsersTable"><div class="skeleton"></div></div>
+                </div>
+            </div>
+
+            <!-- USERS TAB -->
+            <div id="usersTab" class="admin-tab">
+                <div class="admin-page-header">
+                    <h1>
+                        <span class="icon">
+                            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style="width:1.2em;height:1.2em">
+                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                                <circle cx="9" cy="7" r="4"/>
+                                <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                            </svg>
+                        </span>
+                        All Users
+                    </h1>
+                    <div style="display:flex;gap:10px;align-items:center">
+                        <input id="userSearchInput" class="inp" placeholder="Search by email or name..."
+                            style="width:260px" oninput="filterUsers()">
+                    </div>
+                </div>
+                <div class="card">
+                    <div id="usersTableWrap"><div class="skeleton"></div><div class="skeleton short"></div></div>
+                </div>
+
+                <!-- User Detail Panel -->
+                <div id="userDetailPanel" class="user-detail-panel hidden">
+                    <div class="user-detail-header">
+                        <div class="user-detail-avatar" id="detailAvatar">U</div>
+                        <div>
+                            <div class="user-detail-name" id="detailName">—</div>
+                            <div class="user-detail-email" id="detailEmail">—</div>
+                            <div class="user-detail-joined" id="detailJoined">—</div>
+                        </div>
+                        <button class="btn-close-detail" onclick="closeUserDetail()">
+                            <!-- X icon replacing ✕ -->
+                            <span class="icon">
+                                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <line x1="18" y1="6" x2="6" y2="18"/>
+                                    <line x1="6" y1="6" x2="18" y2="18"/>
+                                </svg>
+                            </span>
+                            Close
+                        </button>
+                    </div>
+
+                    <div class="admin-stats-grid" style="margin:16px 0">
+
+                        <div class="admin-stat-card">
+                            <div class="admin-stat-icon icon">
+                                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <rect x="2" y="7" width="20" height="14" rx="2"/>
+                                    <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/>
+                                </svg>
+                            </div>
+                            <div class="admin-stat-body">
+                                <span class="admin-stat-label">Annual Income</span>
+                                <span class="admin-stat-val" id="detailIncome">—</span>
+                            </div>
+                        </div>
+
+                        <div class="admin-stat-card">
+                            <div class="admin-stat-icon icon">
+                                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16l3-2 2 2 2-2 2 2 2-2 3 2V4a2 2 0 0 0-2-2z"/>
+                                    <line x1="9" y1="9" x2="15" y2="9"/>
+                                    <line x1="9" y1="13" x2="15" y2="13"/>
+                                </svg>
+                            </div>
+                            <div class="admin-stat-body">
+                                <span class="admin-stat-label">Avg Monthly Expense</span>
+                                <span class="admin-stat-val" id="detailExpense">—</span>
+                            </div>
+                        </div>
+
+                        <div class="admin-stat-card">
+                            <div class="admin-stat-icon icon">
+                                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <polyline points="3 9 12 2 21 9"/>
+                                    <rect x="3" y="9" width="18" height="11" rx="1"/>
+                                    <line x1="3" y1="20" x2="21" y2="20"/>
+                                    <line x1="7" y1="12" x2="7" y2="17"/>
+                                    <line x1="12" y1="12" x2="12" y2="17"/>
+                                    <line x1="17" y1="12" x2="17" y2="17"/>
+                                </svg>
+                            </div>
+                            <div class="admin-stat-body">
+                                <span class="admin-stat-label">Total Savings</span>
+                                <span class="admin-stat-val" id="detailSavings">—</span>
+                            </div>
+                        </div>
+
+                        <div class="admin-stat-card accent">
+                            <div class="admin-stat-icon icon">
+                                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                                </svg>
+                            </div>
+                            <div class="admin-stat-body">
+                                <span class="admin-stat-label">Health Score</span>
+                                <span class="admin-stat-val" id="detailHealth">—</span>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div style="display:flex;gap:10px;margin-top:8px">
+                        <button class="btn-action"
+                            style="background:linear-gradient(135deg,var(--red),#c0392b);font-size:.82rem;padding:8px 16px"
+                            onclick="deleteUserData()">
+                            <!-- Trash icon replacing 🗑️ -->
+                            <span class="icon">
+                                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <polyline points="3 6 5 6 21 6"/>
+                                    <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+                                    <path d="M10 11v6M14 11v6"/>
+                                    <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+                                </svg>
+                            </span>
+                            Delete User Data
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FINANCIALS TAB -->
+            <div id="financesTab" class="admin-tab">
+                <div class="admin-page-header">
+                    <h1>
+                        <span class="icon">
+                            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style="width:1.2em;height:1.2em">
+                                <line x1="12" y1="1" x2="12" y2="23"/>
+                                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                            </svg>
+                        </span>
+                        Financial Overview
+                    </h1>
+                </div>
+                <div class="grid-2">
+
+                    <div class="card">
+                        <div class="card-header">
+                            <span>
+                                <!-- Briefcase icon replacing 💼 -->
+                                <span class="icon">
+                                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <rect x="2" y="7" width="20" height="14" rx="2"/>
+                                        <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/>
+                                    </svg>
+                                </span>
+                                Top Earners
+                            </span>
+                        </div>
+                        <div id="topEarnersTable"><div class="skeleton"></div></div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <span>
+                                <!-- Receipt icon replacing 🧾 -->
+                                <span class="icon">
+                                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M14 2H6a2 2 0 0 0-2 2v16l3-2 2 2 2-2 2 2 2-2 3 2V4a2 2 0 0 0-2-2z"/>
+                                        <line x1="9" y1="9" x2="15" y2="9"/>
+                                        <line x1="9" y1="13" x2="15" y2="13"/>
+                                    </svg>
+                                </span>
+                                Highest Spenders
+                            </span>
+                        </div>
+                        <div id="topSpendersTable"><div class="skeleton"></div></div>
+                    </div>
+
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <span>
+                            <!-- Bank icon replacing 🏦 -->
+                            <span class="icon">
+                                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <polyline points="3 9 12 2 21 9"/>
+                                    <rect x="3" y="9" width="18" height="11" rx="1"/>
+                                    <line x1="3" y1="20" x2="21" y2="20"/>
+                                    <line x1="7" y1="12" x2="7" y2="17"/>
+                                    <line x1="12" y1="12" x2="12" y2="17"/>
+                                    <line x1="17" y1="12" x2="17" y2="17"/>
+                                </svg>
+                            </span>
+                            Top Savers
+                        </span>
+                    </div>
+                    <div id="topSaversTable"><div class="skeleton"></div></div>
+                </div>
+            </div>
+
+            <!-- HEALTH SCORES TAB -->
+            <div id="healthTab" class="admin-tab">
+                <div class="admin-page-header">
+                    <h1>
+                        <span class="icon">
+                            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style="width:1.2em;height:1.2em">
+                                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                            </svg>
+                        </span>
+                        Health Score Leaderboard
+                    </h1>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <span>
+                            <!-- Trophy icon replacing 🏆 -->
+                            <span class="icon">
+                                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M6 9H4a2 2 0 0 0-2 2v1a5 5 0 0 0 5 5h.5"/>
+                                    <path d="M18 9h2a2 2 0 0 1 2 2v1a5 5 0 0 1-5 5h-.5"/>
+                                    <path d="M8 21h8M12 17v4"/>
+                                    <rect x="6" y="2" width="12" height="13" rx="2"/>
+                                </svg>
+                            </span>
+                            All Users Ranked by Financial Health
+                        </span>
+                        <span class="card-badge">Live</span>
+                    </div>
+                    <div id="healthLeaderboard"><div class="skeleton"></div></div>
+                </div>
+            </div>
+
+            <!-- EXPORT TAB -->
+            <div id="exportTab" class="admin-tab">
+                <div class="admin-page-header">
+                    <h1>
+                        <span class="icon">
+                            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style="width:1.2em;height:1.2em">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                <polyline points="7 10 12 15 17 10"/>
+                                <line x1="12" y1="15" x2="12" y2="3"/>
+                            </svg>
+                        </span>
+                        Export Data
+                    </h1>
+                </div>
+                <div class="grid-2">
+
+                    <div class="card">
+                        <div class="card-header">
+                            <span>
+                                <!-- List icon replacing 📋 -->
+                                <span class="icon">
+                                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <line x1="8" y1="6" x2="21" y2="6"/>
+                                        <line x1="8" y1="12" x2="21" y2="12"/>
+                                        <line x1="8" y1="18" x2="21" y2="18"/>
+                                        <line x1="3" y1="6" x2="3.01" y2="6"/>
+                                        <line x1="3" y1="12" x2="3.01" y2="12"/>
+                                        <line x1="3" y1="18" x2="3.01" y2="18"/>
+                                    </svg>
+                                </span>
+                                Export Options
+                            </span>
+                        </div>
+                        <div style="display:flex;flex-direction:column;gap:12px;margin-top:8px">
+
+                            <button class="export-btn" onclick="exportCSV('users')">
+                                <span class="icon">
+                                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                                        <circle cx="9" cy="7" r="4"/>
+                                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                                        <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                                    </svg>
+                                </span>
+                                Export All Users CSV
+                            </button>
+
+                            <button class="export-btn" onclick="exportCSV('income')">
+                                <span class="icon">
+                                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <rect x="2" y="7" width="20" height="14" rx="2"/>
+                                        <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/>
+                                    </svg>
+                                </span>
+                                Export All Income Records CSV
+                            </button>
+
+                            <button class="export-btn" onclick="exportCSV('expenses')">
+                                <span class="icon">
+                                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M14 2H6a2 2 0 0 0-2 2v16l3-2 2 2 2-2 2 2 2-2 3 2V4a2 2 0 0 0-2-2z"/>
+                                        <line x1="9" y1="9" x2="15" y2="9"/>
+                                        <line x1="9" y1="13" x2="15" y2="13"/>
+                                    </svg>
+                                </span>
+                                Export All Expense Records CSV
+                            </button>
+
+                            <button class="export-btn" onclick="exportCSV('savings')">
+                                <span class="icon">
+                                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <polyline points="3 9 12 2 21 9"/>
+                                        <rect x="3" y="9" width="18" height="11" rx="1"/>
+                                        <line x1="3" y1="20" x2="21" y2="20"/>
+                                        <line x1="7" y1="12" x2="7" y2="17"/>
+                                        <line x1="12" y1="12" x2="12" y2="17"/>
+                                        <line x1="17" y1="12" x2="17" y2="17"/>
+                                    </svg>
+                                </span>
+                                Export All Savings Records CSV
+                            </button>
+
+                            <button class="export-btn green" onclick="exportCSV('full')">
+                                <span class="icon">
+                                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                        <polyline points="7 10 12 15 17 10"/>
+                                        <line x1="12" y1="15" x2="12" y2="3"/>
+                                    </svg>
+                                </span>
+                                Export Full Report CSV
+                            </button>
+
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <span>
+                                <!-- Info icon replacing ℹ️ -->
+                                <span class="icon">
+                                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <circle cx="12" cy="12" r="10"/>
+                                        <line x1="12" y1="16" x2="12" y2="12"/>
+                                        <line x1="12" y1="8" x2="12.01" y2="8"/>
+                                    </svg>
+                                </span>
+                                Export Info
+                            </span>
+                        </div>
+
+                        <div class="info-banner">
+                            <div class="info-icon icon">
+                                <!-- Bar chart icon replacing 📊 -->
+                                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <rect x="3" y="12" width="4" height="9"/><rect x="10" y="7" width="4" height="14"/><rect x="17" y="3" width="4" height="18"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <strong>CSV Format</strong>
+                                <p>All exports are in CSV format which can be opened in Excel, Google Sheets, or any spreadsheet software.</p>
+                            </div>
+                        </div>
+
+                        <div class="info-banner" style="margin-top:12px">
+                            <div class="info-icon icon">
+                                <!-- Lock icon replacing 🔒 -->
+                                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <rect x="3" y="11" width="18" height="11" rx="2"/>
+                                    <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <strong>Admin Only</strong>
+                                <p>These exports are only accessible to admin accounts listed in <code>admins.json</code>.</p>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+</div>
+
+<!-- Toast -->
+<div id="toast" class="toast" aria-live="polite"></div>
+
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script src="admin.js"></script>
+
+</body>
+</html>
