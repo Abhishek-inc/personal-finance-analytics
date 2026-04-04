@@ -6,7 +6,7 @@
     <title>FinanceHub — Smart Money Dashboard</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Fira+Code:wght@400;500;600&family=Playfair+Display:wght@700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -23,21 +23,30 @@
     <!-- Left panel -->
     <div class="auth-panel auth-left">
         <div class="auth-brand">
-            <div class="brand-icon">
-                <svg viewBox="0 0 40 40" fill="none">
-                    <circle cx="20" cy="20" r="20" fill="url(#grad1)"/>
-                    <path d="M12 28 L20 12 L28 28" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-                    <path d="M15 23 L25 23" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
-                    <defs>
-                        <linearGradient id="grad1" x1="0" y1="0" x2="40" y2="40">
-                            <stop offset="0%" stop-color="#6C63FF"/>
-                            <stop offset="100%" stop-color="#3B82F6"/>
-                        </linearGradient>
-                    </defs>
-                </svg>
+            <div class="fh-logo" style="margin-bottom:12px;animation:iconBob 3s ease-in-out infinite;">
+                <div class="fh-logo-icon">
+                    <svg width="68" height="68" viewBox="0 0 70 70" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <linearGradient id="logoGradA" x1="0" y1="0" x2="70" y2="70" gradientUnits="userSpaceOnUse">
+                                <stop offset="0%" stop-color="#a78bfa"/>
+                                <stop offset="100%" stop-color="#60a5fa"/>
+                            </linearGradient>
+                            <filter id="glowA"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+                        </defs>
+                        <circle cx="35" cy="35" r="33" stroke="url(#logoGradA)" stroke-width="1.5" stroke-dasharray="4 3" opacity="0.5"/>
+                        <circle cx="35" cy="35" r="28" fill="url(#logoGradA)" opacity="0.12"/>
+                        <rect x="17" y="32" width="7" height="16" rx="2" fill="url(#logoGradA)" opacity="0.7"/>
+                        <rect x="28" y="24" width="7" height="24" rx="2" fill="url(#logoGradA)" opacity="0.85"/>
+                        <rect x="39" y="18" width="7" height="30" rx="2" fill="url(#logoGradA)"/>
+                        <polyline points="20,28 31,20 42,14 53,16" stroke="#f59e0b" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" fill="none" filter="url(#glowA)" opacity="0.9"/>
+                        <circle cx="53" cy="16" r="3" fill="#f59e0b" filter="url(#glowA)"/>
+                    </svg>
+                </div>
+                <div class="fh-logo-text-wrap">
+                    <span class="fh-logo-name" style="font-size:2.8rem;">FinanceHub</span>
+                    <span class="fh-logo-tag">Your complete financial command center</span>
+                </div>
             </div>
-            <h1 class="brand-name">FinanceHub</h1>
-            <p class="brand-tag">Your complete financial command center</p>
         </div>
 
         <div class="auth-features">
@@ -65,8 +74,8 @@
             <div class="feature-item">
                 <span class="fi-icon fi-secure"></span>
                 <div>
-                    <strong>Bank-Grade Security</strong>
-                    <p>Powered by Firebase Firestore</p>
+                    <strong>6-Month Forecast</strong>
+                    <p>Predict future expenses with ML trends</p>
                 </div>
             </div>
         </div>
@@ -151,10 +160,27 @@
     <!-- Sidebar -->
     <aside class="sidebar" id="sidebar">
         <div class="sidebar-brand">
-            <div class="brand-icon-sm">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+            <div class="fh-logo">
+                <div class="fh-logo-icon">
+                    <svg width="36" height="36" viewBox="0 0 70 70" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <linearGradient id="logoGradS" x1="0" y1="0" x2="70" y2="70" gradientUnits="userSpaceOnUse">
+                                <stop offset="0%" stop-color="#a78bfa"/>
+                                <stop offset="100%" stop-color="#60a5fa"/>
+                            </linearGradient>
+                        </defs>
+                        <circle cx="35" cy="35" r="28" fill="url(#logoGradS)" opacity="0.15"/>
+                        <rect x="17" y="32" width="7" height="16" rx="2" fill="url(#logoGradS)" opacity="0.7"/>
+                        <rect x="28" y="24" width="7" height="24" rx="2" fill="url(#logoGradS)" opacity="0.85"/>
+                        <rect x="39" y="18" width="7" height="30" rx="2" fill="url(#logoGradS)"/>
+                        <polyline points="20,28 31,20 42,14 53,16" stroke="#f59e0b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity="0.9"/>
+                        <circle cx="53" cy="16" r="3" fill="#f59e0b"/>
+                    </svg>
+                </div>
+                <div class="fh-logo-text-wrap">
+                    <span class="fh-logo-name" style="font-size:1.3rem;">FinanceHub</span>
+                </div>
             </div>
-            <span>FinanceHub</span>
         </div>
 
         <nav class="sidebar-nav">
@@ -188,6 +214,12 @@
                 <span class="nav-label">Health Score</span>
                 <span class="nav-indicator"></span>
             </button>
+            <button class="nav-item" onclick="switchTab('forecast',this)" data-tab="forecast">
+                <span class="nav-icon nav-icon-forecast"></span>
+                <span class="nav-label">6M Forecast</span>
+                <span class="nav-indicator"></span>
+                <span class="nav-new-badge">NEW</span>
+            </button>
         </nav>
 
         <!-- Hidden Admin Link — only visible to admin emails -->
@@ -215,7 +247,7 @@
         <button class="hamburger" id="hamburger" onclick="toggleSidebar()">
             <span></span><span></span><span></span>
         </button>
-        <span class="mobile-brand">FinanceHub</span>
+        <span class="mobile-brand" style="font-family:'Playfair Display',serif;">FinanceHub</span>
         <button class="btn-logout-sm" onclick="handleLogout()">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="18" height="18"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
         </button>
@@ -273,31 +305,15 @@
 
         <!-- OVERVIEW TAB -->
         <div id="overviewTab" class="tab-content active">
-            <div class="grid-2">
-                <div class="card">
-                    <div class="card-header">
-                        <span>Summary</span>
-                        <span class="card-badge">Live</span>
-                    </div>
-                    <div id="overviewContent" class="loading-state">
-                        <div class="skeleton"></div>
-                        <div class="skeleton short"></div>
-                        <div class="skeleton"></div>
-                    </div>
+            <div class="card">
+                <div class="card-header">
+                    <span>Summary</span>
+                    <span class="card-badge">Live</span>
                 </div>
-                <div class="card">
-                    <div class="card-header">
-                        <span>Firebase Info</span>
-                    </div>
-                    <div class="info-banner">
-                        <div class="info-icon">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
-                        </div>
-                        <div>
-                            <strong>Live Cloud Database</strong>
-                            <p>Data saved to <code>Cloud Firestore</code> in real-time. Each user's data lives under <code>users/{uid}/</code> protected by Security Rules.</p>
-                        </div>
-                    </div>
+                <div id="overviewContent" class="loading-state">
+                    <div class="skeleton"></div>
+                    <div class="skeleton short"></div>
+                    <div class="skeleton"></div>
                 </div>
             </div>
             <div class="card">
@@ -338,8 +354,7 @@
                                 <span class="tip-icon" data-tip="inc-sal">i</span>
                                 <div class="tooltip" id="tip-inc-sal">
                                     <div class="tt-title">Gross Annual Salary</div>
-                                    <div class="tt-body">Enter your <strong>total annual CTC or gross salary</strong> before any deductions. Include basic pay, DA, HRA, and all allowances for the full year. Check Form 16 Part B.</div>
-                                    <div class="tt-example">Example: &#8377;12,00,000 per year</div>
+                                    <div class="tt-body">Enter your <strong>total annual CTC or gross salary</strong> before any deductions.</div>
                                 </div>
                             </label>
                             <div class="field-hint">Total yearly CTC / gross pay</div>
@@ -352,8 +367,7 @@
                                 <span class="tip-icon" data-tip="inc-bon">i</span>
                                 <div class="tooltip" id="tip-inc-bon">
                                     <div class="tt-title">Performance Bonus</div>
-                                    <div class="tt-body">Any <strong>performance bonus, joining bonus, or incentive</strong> received during the year. These are fully taxable as salary income. Include all bonuses received in this FY.</div>
-                                    <div class="tt-example">Example: &#8377;1,50,000 one-time bonus</div>
+                                    <div class="tt-body">Any <strong>performance bonus, joining bonus, or incentive</strong> received during the year.</div>
                                 </div>
                             </label>
                             <div class="field-hint">One-time / annual performance bonus</div>
@@ -366,8 +380,7 @@
                                 <span class="tip-icon" data-tip="inc-rent">i</span>
                                 <div class="tooltip" id="tip-inc-rent">
                                     <div class="tt-title">Annual Rental Income</div>
-                                    <div class="tt-body">Total annual rent received from any property you own. A <strong>30% standard deduction</strong> on net rental income is allowed under Section 24(a) — but enter the gross annual rent here.</div>
-                                    <div class="tt-example">Example: &#8377;2,40,000 (&#8377;20,000/month &times; 12)</div>
+                                    <div class="tt-body">Total annual rent received from any property you own.</div>
                                 </div>
                             </label>
                             <div class="field-hint">Total rent received for the full year</div>
@@ -380,8 +393,7 @@
                                 <span class="tip-icon" data-tip="inc-cg">i</span>
                                 <div class="tooltip" id="tip-inc-cg">
                                     <div class="tt-title">Capital Gains</div>
-                                    <div class="tt-body">Profit from selling <strong>stocks, mutual funds, property, or gold</strong>. Short-term gains (held &lt;1 year) taxed at <strong>20%</strong>; long-term gains above &#8377;1.25L taxed at <strong>12.5%</strong>. Enter total gains here.</div>
-                                    <div class="tt-example">Example: &#8377;80,000 from mutual fund redemption</div>
+                                    <div class="tt-body">Profit from selling <strong>stocks, mutual funds, property, or gold</strong>.</div>
                                 </div>
                             </label>
                             <div class="field-hint">Profit from selling assets (stocks, MF, property)</div>
@@ -394,8 +406,7 @@
                                 <span class="tip-icon" data-tip="inc-oth">i</span>
                                 <div class="tooltip" id="tip-inc-oth">
                                     <div class="tt-title">Other Annual Income</div>
-                                    <div class="tt-body">Include: <strong>bank FD interest, savings account interest, freelance income, dividends, gifts above &#8377;50,000,</strong> or any other income not covered above. All taxable under "Income from Other Sources".</div>
-                                    <div class="tt-example">Example: &#8377;45,000 (FD interest for the year)</div>
+                                    <div class="tt-body">Include: <strong>bank FD interest, savings account interest, freelance income, dividends.</strong></div>
                                 </div>
                             </label>
                             <div class="field-hint">FD interest, freelance, dividends, etc. for year</div>
@@ -416,9 +427,8 @@
                                 <span class="tip-icon" data-tip="ded-80c">i</span>
                                 <div class="tooltip" id="tip-ded-80c">
                                     <div class="tt-title">Section 80C — Max &#8377;1,50,000</div>
-                                    <div class="tt-body">Covers: <strong>EPF, PPF, ELSS mutual funds, LIC premium, NSC, 5-year FD, tuition fees, home loan principal repayment, Sukanya Samriddhi.</strong></div>
+                                    <div class="tt-body">Covers: <strong>EPF, PPF, ELSS mutual funds, LIC premium, NSC, 5-year FD, tuition fees, home loan principal repayment.</strong></div>
                                     <div class="tt-limit">Maximum limit: &#8377;1,50,000/year</div>
-                                    <div class="tt-example">Tip: Invest in ELSS for tax saving + market returns</div>
                                 </div>
                             </label>
                             <div class="field-hint">EPF, PPF, ELSS, LIC, NSC — max &#8377;1.5L/year</div>
@@ -431,9 +441,8 @@
                                 <span class="tip-icon" data-tip="ded-80d">i</span>
                                 <div class="tooltip" id="tip-ded-80d">
                                     <div class="tt-title">Section 80D — Health Insurance</div>
-                                    <div class="tt-body">Deduction for <strong>health insurance premiums</strong> paid for yourself, spouse, children, and parents. Includes preventive health check-up costs up to &#8377;5,000.</div>
+                                    <div class="tt-body">Deduction for <strong>health insurance premiums</strong> paid for yourself, spouse, children, and parents.</div>
                                     <div class="tt-limit">Self+family: &#8377;25,000 | Senior citizen parents: +&#8377;50,000</div>
-                                    <div class="tt-example">Total max: &#8377;75,000 if parents are senior citizens</div>
                                 </div>
                             </label>
                             <div class="field-hint">Annual health insurance premium paid</div>
@@ -446,8 +455,7 @@
                                 <span class="tip-icon" data-tip="ded-80g">i</span>
                                 <div class="tooltip" id="tip-ded-80g">
                                     <div class="tt-title">Section 80G — Donations</div>
-                                    <div class="tt-body">Deduction for <strong>donations to approved charitable organisations</strong> (e.g. PM Relief Fund, CRY, temples, NGOs). Some donations qualify for <strong>100% deduction</strong>, others for <strong>50%</strong>.</div>
-                                    <div class="tt-example">Tip: Always get an 80G receipt from the organisation</div>
+                                    <div class="tt-body">Deduction for <strong>donations to approved charitable organisations</strong>.</div>
                                 </div>
                             </label>
                             <div class="field-hint">Donations to approved charities / NGOs</div>
@@ -460,9 +468,8 @@
                                 <span class="tip-icon" data-tip="ded-24">i</span>
                                 <div class="tooltip" id="tip-ded-24">
                                     <div class="tt-title">Section 24(b) — Home Loan Interest</div>
-                                    <div class="tt-body">Deduction on <strong>annual interest paid on home loan</strong> for a self-occupied property. If the property is let out, the entire interest is deductible. Check your loan statement for annual interest paid.</div>
+                                    <div class="tt-body">Deduction on <strong>annual interest paid on home loan</strong> for a self-occupied property.</div>
                                     <div class="tt-limit">Self-occupied: Max &#8377;2,00,000/year</div>
-                                    <div class="tt-example">Example: &#8377;1,80,000 interest paid this year</div>
                                 </div>
                             </label>
                             <div class="field-hint">Annual home loan interest paid — max &#8377;2L</div>
@@ -475,9 +482,8 @@
                                 <span class="tip-icon" data-tip="ded-nps">i</span>
                                 <div class="tooltip" id="tip-ded-nps">
                                     <div class="tt-title">Section 80CCD(1B) — NPS</div>
-                                    <div class="tt-body">Additional deduction for annual contributions to <strong>National Pension Scheme (NPS) Tier-1</strong> account. This is <strong>over and above</strong> the &#8377;1.5L limit of 80C.</div>
+                                    <div class="tt-body">Additional deduction for annual contributions to <strong>National Pension Scheme (NPS) Tier-1</strong> account.</div>
                                     <div class="tt-limit">Extra limit: &#8377;50,000/year (on top of 80C)</div>
-                                    <div class="tt-example">Tip: Great for long-term retirement planning + tax saving</div>
                                 </div>
                             </label>
                             <div class="field-hint">Annual NPS Tier-1 contribution — max &#8377;50K extra</div>
@@ -490,8 +496,7 @@
                                 <span class="tip-icon" data-tip="ded-hra">i</span>
                                 <div class="tooltip" id="tip-ded-hra">
                                     <div class="tt-title">HRA — House Rent Allowance</div>
-                                    <div class="tt-body">If you receive HRA from your employer and pay rent, a portion is <strong>exempt from tax</strong>. Exemption is the least of: actual HRA received, 50% of salary (metro) / 40% (non-metro), or rent paid minus 10% of salary.</div>
-                                    <div class="tt-example">Tip: Submit rent receipts + landlord PAN to employer</div>
+                                    <div class="tt-body">If you receive HRA from your employer and pay rent, a portion is <strong>exempt from tax</strong>.</div>
                                 </div>
                             </label>
                             <div class="field-hint">Annual HRA exempt portion (check Form 16)</div>
@@ -519,104 +524,17 @@
             <div class="card">
                 <div class="card-header"><span>Add Monthly Expenses</span></div>
                 <div class="form-grid-3">
-
                     <div class="form-group-inline">
-                        <label class="tip-label">
-                            Month-Year (YYYY-MM)
-                            <span class="tip-icon" data-tip="exp-mo">i</span>
-                            <div class="tooltip" id="tip-exp-mo">
-                                <div class="tt-title">Month-Year Format</div>
-                                <div class="tt-body">Enter the month in <strong>YYYY-MM</strong> format. This is used as the unique record ID — entering the same month again will <strong>update</strong> the existing record.</div>
-                                <div class="tt-example">Example: 2024-12 for December 2024</div>
-                            </div>
-                        </label>
+                        <label class="tip-label">Month-Year (YYYY-MM)<span class="tip-icon" data-tip="exp-mo">i</span><div class="tooltip" id="tip-exp-mo"><div class="tt-title">Month-Year Format</div><div class="tt-body">Enter the month in <strong>YYYY-MM</strong> format.</div><div class="tt-example">Example: 2024-12 for December 2024</div></div></label>
                         <input id="expMonth" placeholder="2024-12" class="inp">
                     </div>
-
-                    <div class="form-group-inline">
-                        <label class="tip-label">
-                            Rent (&#8377;)
-                            <span class="tip-icon" data-tip="exp-rent">i</span>
-                            <div class="tooltip" id="tip-exp-rent">
-                                <div class="tt-title">Monthly Rent</div>
-                                <div class="tt-body">Total rent paid for your home this month. If you own your home, enter 0. Keep rent receipts for HRA exemption claims with your employer.</div>
-                            </div>
-                        </label>
-                        <input type="number" id="eRent" value="0" class="inp">
-                    </div>
-
-                    <div class="form-group-inline">
-                        <label class="tip-label">
-                            Groceries (&#8377;)
-                            <span class="tip-icon" data-tip="exp-groc">i</span>
-                            <div class="tooltip" id="tip-exp-groc">
-                                <div class="tt-title">Groceries &amp; Food</div>
-                                <div class="tt-body">Monthly spend on <strong>supermarket, vegetables, dairy, eating out, food delivery</strong> and all food-related expenses. Aim to keep this under <strong>15% of monthly income</strong> for healthy finances.</div>
-                            </div>
-                        </label>
-                        <input type="number" id="eGrocery" value="0" class="inp">
-                    </div>
-
-                    <div class="form-group-inline">
-                        <label class="tip-label">
-                            Utilities (&#8377;)
-                            <span class="tip-icon" data-tip="exp-util">i</span>
-                            <div class="tooltip" id="tip-exp-util">
-                                <div class="tt-title">Utilities</div>
-                                <div class="tt-body">Monthly bills for <strong>electricity, water, gas (LPG), internet, mobile recharge, OTT subscriptions</strong> and any other recurring household services.</div>
-                            </div>
-                        </label>
-                        <input type="number" id="eUtil" value="0" class="inp">
-                    </div>
-
-                    <div class="form-group-inline">
-                        <label class="tip-label">
-                            Transportation (&#8377;)
-                            <span class="tip-icon" data-tip="exp-trans">i</span>
-                            <div class="tooltip" id="tip-exp-trans">
-                                <div class="tt-title">Transportation</div>
-                                <div class="tt-body">All commute costs including <strong>fuel, cab rides, metro/bus passes, vehicle EMI, parking, vehicle maintenance,</strong> and toll charges.</div>
-                            </div>
-                        </label>
-                        <input type="number" id="eTrans" value="0" class="inp">
-                    </div>
-
-                    <div class="form-group-inline">
-                        <label class="tip-label">
-                            Entertainment (&#8377;)
-                            <span class="tip-icon" data-tip="exp-ent">i</span>
-                            <div class="tooltip" id="tip-exp-ent">
-                                <div class="tt-title">Entertainment &amp; Leisure</div>
-                                <div class="tt-body">Spending on <strong>movies, concerts, dining out, weekend trips, hobbies, shopping</strong> (non-essential), and social outings. Advisors suggest capping this at <strong>10% of monthly income</strong>.</div>
-                            </div>
-                        </label>
-                        <input type="number" id="eEnt" value="0" class="inp">
-                    </div>
-
-                    <div class="form-group-inline">
-                        <label class="tip-label">
-                            Healthcare (&#8377;)
-                            <span class="tip-icon" data-tip="exp-health">i</span>
-                            <div class="tooltip" id="tip-exp-health">
-                                <div class="tt-title">Healthcare</div>
-                                <div class="tt-body">Monthly spend on <strong>medicines, doctor consultations, lab tests, dental/optical</strong> care, gym membership, and health insurance premiums. Preventive check-ups up to &#8377;5,000 qualify for <strong>80D deduction</strong>.</div>
-                            </div>
-                        </label>
-                        <input type="number" id="eHealth" value="0" class="inp">
-                    </div>
-
-                    <div class="form-group-inline">
-                        <label class="tip-label">
-                            Education (&#8377;)
-                            <span class="tip-icon" data-tip="exp-edu">i</span>
-                            <div class="tooltip" id="tip-exp-edu">
-                                <div class="tt-title">Education</div>
-                                <div class="tt-body">Costs for <strong>school/college fees, coaching classes, online courses, books, stationery,</strong> or any skill development. Tuition fees for children (up to 2) are deductible under <strong>Section 80C</strong>.</div>
-                            </div>
-                        </label>
-                        <input type="number" id="eEdu" value="0" class="inp">
-                    </div>
-
+                    <div class="form-group-inline"><label>Rent (&#8377;)</label><input type="number" id="eRent" value="0" class="inp"></div>
+                    <div class="form-group-inline"><label>Groceries (&#8377;)</label><input type="number" id="eGrocery" value="0" class="inp"></div>
+                    <div class="form-group-inline"><label>Utilities (&#8377;)</label><input type="number" id="eUtil" value="0" class="inp"></div>
+                    <div class="form-group-inline"><label>Transportation (&#8377;)</label><input type="number" id="eTrans" value="0" class="inp"></div>
+                    <div class="form-group-inline"><label>Entertainment (&#8377;)</label><input type="number" id="eEnt" value="0" class="inp"></div>
+                    <div class="form-group-inline"><label>Healthcare (&#8377;)</label><input type="number" id="eHealth" value="0" class="inp"></div>
+                    <div class="form-group-inline"><label>Education (&#8377;)</label><input type="number" id="eEdu" value="0" class="inp"></div>
                 </div>
                 <button class="btn-action" onclick="saveExpense()">Save Expenses</button>
             </div>
@@ -631,98 +549,13 @@
             <div class="card">
                 <div class="card-header"><span>Add Monthly Savings</span></div>
                 <div class="form-grid-3">
-
-                    <div class="form-group-inline">
-                        <label class="tip-label">
-                            Month-Year (YYYY-MM)
-                            <span class="tip-icon" data-tip="sav-mo">i</span>
-                            <div class="tooltip" id="tip-sav-mo">
-                                <div class="tt-title">Month-Year Format</div>
-                                <div class="tt-body">Enter in <strong>YYYY-MM</strong> format. Entering the same month again will <strong>update</strong> (not duplicate) the record.</div>
-                                <div class="tt-example">Example: 2024-12 for December 2024</div>
-                            </div>
-                        </label>
-                        <input id="savMonth" placeholder="2024-12" class="inp">
-                    </div>
-
-                    <div class="form-group-inline">
-                        <label class="tip-label">
-                            Fixed Deposits (&#8377;)
-                            <span class="tip-icon" data-tip="sav-fd">i</span>
-                            <div class="tooltip" id="tip-sav-fd">
-                                <div class="tt-title">Fixed Deposits (FD)</div>
-                                <div class="tt-body">Amount invested in <strong>bank FDs or post office time deposits</strong> this month. FDs offer guaranteed returns (6&#8211;7.5% p.a.). Note: FD interest is <strong>fully taxable</strong>. 5-year FDs qualify for 80C deduction.</div>
-                                <div class="tt-example">Safe, low-risk. Best for emergency corpus.</div>
-                            </div>
-                        </label>
-                        <input type="number" id="sFD" value="0" class="inp">
-                    </div>
-
-                    <div class="form-group-inline">
-                        <label class="tip-label">
-                            Mutual Funds (&#8377;)
-                            <span class="tip-icon" data-tip="sav-mf">i</span>
-                            <div class="tooltip" id="tip-sav-mf">
-                                <div class="tt-title">Mutual Funds / SIP</div>
-                                <div class="tt-body">Monthly SIP amount or lump-sum invested in <strong>equity, debt, hybrid, or ELSS mutual funds</strong>. ELSS funds also give <strong>Section 80C</strong> benefit. Best for long-term wealth creation.</div>
-                                <div class="tt-example">Tip: Start a SIP — even &#8377;500/month compounds significantly!</div>
-                            </div>
-                        </label>
-                        <input type="number" id="sMF" value="0" class="inp">
-                    </div>
-
-                    <div class="form-group-inline">
-                        <label class="tip-label">
-                            PPF (&#8377;)
-                            <span class="tip-icon" data-tip="sav-ppf">i</span>
-                            <div class="tooltip" id="tip-sav-ppf">
-                                <div class="tt-title">Public Provident Fund (PPF)</div>
-                                <div class="tt-body">Government-backed savings scheme with <strong>7.1% tax-free interest</strong>. Contributions qualify for <strong>Section 80C</strong>. Lock-in period: 15 years. EEE status — contributions, interest, and maturity all tax-free.</div>
-                                <div class="tt-limit">Min &#8377;500 | Max &#8377;1,50,000 per year</div>
-                            </div>
-                        </label>
-                        <input type="number" id="sPPF" value="0" class="inp">
-                    </div>
-
-                    <div class="form-group-inline">
-                        <label class="tip-label">
-                            Stocks (&#8377;)
-                            <span class="tip-icon" data-tip="sav-stk">i</span>
-                            <div class="tooltip" id="tip-sav-stk">
-                                <div class="tt-title">Direct Stocks</div>
-                                <div class="tt-body">Amount invested directly in <strong>NSE/BSE listed equities</strong> via Zerodha, Groww, etc. High risk, high reward. Long-term gains (1+ year) above &#8377;1.25L taxed at <strong>12.5%</strong>. Short-term gains at <strong>20%</strong>.</div>
-                                <div class="tt-example">Tip: Diversify across sectors to reduce risk.</div>
-                            </div>
-                        </label>
-                        <input type="number" id="sStocks" value="0" class="inp">
-                    </div>
-
-                    <div class="form-group-inline">
-                        <label class="tip-label">
-                            Gold (&#8377;)
-                            <span class="tip-icon" data-tip="sav-gold">i</span>
-                            <div class="tooltip" id="tip-sav-gold">
-                                <div class="tt-title">Gold Investment</div>
-                                <div class="tt-body">Investment in <strong>physical gold, Sovereign Gold Bonds (SGB), Gold ETFs, or digital gold</strong>. SGBs earn 2.5% annual interest + capital appreciation + tax-free maturity. Ideal hedge against inflation.</div>
-                                <div class="tt-example">Tip: SGBs are the most tax-efficient way to invest in gold.</div>
-                            </div>
-                        </label>
-                        <input type="number" id="sGold" value="0" class="inp">
-                    </div>
-
-                    <div class="form-group-inline">
-                        <label class="tip-label">
-                            Emergency Fund (&#8377;)
-                            <span class="tip-icon" data-tip="sav-emg">i</span>
-                            <div class="tooltip" id="tip-sav-emg">
-                                <div class="tt-title">Emergency Fund</div>
-                                <div class="tt-body">Money set aside in a <strong>liquid account (savings/liquid fund)</strong> for emergencies like job loss, medical bills, or urgent repairs. Recommend <strong>3&#8211;6 months of expenses</strong> as your emergency corpus.</div>
-                                <div class="tt-example">Goal: &#8377;3L&#8211;&#8377;5L if monthly expenses are ~&#8377;50,000</div>
-                            </div>
-                        </label>
-                        <input type="number" id="sEmerg" value="0" class="inp">
-                    </div>
-
+                    <div class="form-group-inline"><label>Month-Year (YYYY-MM)</label><input id="savMonth" placeholder="2024-12" class="inp"></div>
+                    <div class="form-group-inline"><label>Fixed Deposits (&#8377;)</label><input type="number" id="sFD" value="0" class="inp"></div>
+                    <div class="form-group-inline"><label>Mutual Funds (&#8377;)</label><input type="number" id="sMF" value="0" class="inp"></div>
+                    <div class="form-group-inline"><label>PPF (&#8377;)</label><input type="number" id="sPPF" value="0" class="inp"></div>
+                    <div class="form-group-inline"><label>Stocks (&#8377;)</label><input type="number" id="sStocks" value="0" class="inp"></div>
+                    <div class="form-group-inline"><label>Gold (&#8377;)</label><input type="number" id="sGold" value="0" class="inp"></div>
+                    <div class="form-group-inline"><label>Emergency Fund (&#8377;)</label><input type="number" id="sEmerg" value="0" class="inp"></div>
                 </div>
                 <button class="btn-action" onclick="saveSavings()">Save Savings</button>
             </div>
@@ -757,16 +590,112 @@
             </div>
         </div>
 
+        <!-- FORECAST TAB -->
+        <div id="forecastTab" class="tab-content">
+
+            <!-- Hero card -->
+            <div class="card forecast-hero-card">
+                <div class="forecast-hero-header">
+                    <div class="forecast-hero-icon">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/>
+                            <polyline points="16 7 22 7 22 13"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <div class="forecast-hero-title">6-Month Expense Forecast</div>
+                        <div class="forecast-hero-sub">AI-powered linear trend analysis on your historical expense data</div>
+                    </div>
+                    <button class="btn-action" id="btnRunForecast" onclick="runForecast()" style="margin-left:auto;white-space:nowrap;">
+                        Generate Forecast
+                    </button>
+                </div>
+            </div>
+
+            <!-- Summary KPI cards -->
+            <div class="forecast-cards-grid" id="forecastSummaryCards"></div>
+
+            <div id="forecastResult" style="display:none;">
+
+                <!-- Row 1: Line chart + Donut -->
+                <div class="fcast-row-2">
+                    <div class="card fcast-main-card">
+                        <div class="card-header">
+                            <span>Monthly Expense Trend</span>
+                            <div class="fcast-legend" id="lineLegend"></div>
+                        </div>
+                        <div class="fcast-chart-wrap">
+                            <canvas id="forecastLineChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header"><span>Category Breakdown</span><span class="card-badge">Forecast</span></div>
+                        <div class="fcast-chart-wrap fcast-donut-wrap">
+                            <canvas id="forecastDonutChart"></canvas>
+                        </div>
+                        <div id="donutLegend" class="fcast-donut-legend"></div>
+                    </div>
+                </div>
+
+                <!-- Row 2: Stacked bar chart -->
+                <div class="card">
+                    <div class="card-header">
+                        <span>Stacked Category View</span>
+                        <span class="card-badge">6 Months</span>
+                    </div>
+                    <div class="fcast-chart-wrap fcast-bar-wrap">
+                        <canvas id="forecastStackedBar"></canvas>
+                    </div>
+                </div>
+
+                <!-- Row 3: Category analysis + Insights -->
+                <div class="grid-2">
+                    <div class="card">
+                        <div class="card-header"><span>Category vs Historical</span></div>
+                        <div id="forecastCategories"></div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header"><span>Smart Insights</span></div>
+                        <div id="forecastInsights"></div>
+                    </div>
+                </div>
+
+                <!-- Row 4: Data table -->
+                <div class="card">
+                    <div class="card-header">
+                        <span>Month-by-Month Breakdown</span>
+                        <span class="card-badge">Forecast</span>
+                    </div>
+                    <div id="forecastTable"></div>
+                </div>
+
+            </div>
+
+            <div id="forecastEmpty" style="display:none;" class="card">
+                <div style="text-align:center;padding:40px 20px;color:var(--text-muted)">
+                    <div style="margin-bottom:16px;opacity:.6;">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+                    </div>
+                    <div style="font-size:1rem;font-weight:600;margin-bottom:8px">No expense data found</div>
+                    <div style="font-size:.85rem">Add at least 1 month of expenses in the <strong>Expenses</strong> tab to generate a forecast.</div>
+                </div>
+            </div>
+        </div>
+
     </main>
 </div>
 
 <!-- Toast notification -->
 <div id="toast" class="toast" aria-live="polite"></div>
 
+<!-- Chart.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+
 <!-- FIREBASE SDKs -->
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script src="icons.js"></script>
 <script src="app.js"></script>
 
 </body>
