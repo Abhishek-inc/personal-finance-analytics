@@ -112,6 +112,12 @@
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                 </button>
 
+                <div class="guest-divider"><span>or</span></div>
+                <button class="btn-guest" onclick="enterGuestMode()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+                    Continue as Guest
+                </button>
+
                 <p class="auth-switch">Don't have an account? <button onclick="toggleAuthForm()">Create one</button></p>
             </div>
 
@@ -220,6 +226,12 @@
                 <span class="nav-indicator"></span>
                 <span class="nav-new-badge">NEW</span>
             </button>
+            <button class="nav-item" onclick="switchTab('suggestions',this)" data-tab="suggestions">
+                <span class="nav-icon nav-icon-suggestions"></span>
+                <span class="nav-label">Suggestions</span>
+                <span class="nav-indicator"></span>
+                <span class="nav-new-badge" style="background:#10b981;">LIVE</span>
+            </button>
         </nav>
 
         <!-- Hidden Admin Link — only visible to admin emails -->
@@ -228,15 +240,29 @@
             <span>Admin Panel</span>
         </a>
 
-        <div class="sidebar-footer">
-            <div class="user-pill">
+        <div class="sidebar-footer" id="sidebarFooter">
+            <!-- Logged-in user pill (default hidden in guest mode) -->
+            <div class="user-pill" id="userPill">
                 <div class="user-avatar" id="userAvatar">U</div>
                 <div class="user-info">
                     <span class="user-name" id="userName">User</span>
                     <span class="user-role" id="userRole">Member</span>
                 </div>
             </div>
-            <button class="btn-logout" onclick="handleLogout()" title="Logout">
+            <!-- Guest footer -->
+            <div class="guest-footer" id="guestFooter" style="display:none;">
+                <div class="guest-info">
+                    <div class="user-avatar guest-avatar">G</div>
+                    <div class="user-info">
+                        <span class="user-name">Guest</span>
+                        <span class="user-role" style="color:var(--accent)">View Only</span>
+                    </div>
+                </div>
+                <button class="btn-login-sm" onclick="exitGuestMode()" title="Login">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="16" height="16"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+                </button>
+            </div>
+            <button class="btn-logout" id="btnLogout" onclick="handleLogout()" title="Logout">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
             </button>
         </div>
@@ -248,8 +274,11 @@
             <span></span><span></span><span></span>
         </button>
         <span class="mobile-brand" style="font-family:'Playfair Display',serif;">FinanceHub</span>
-        <button class="btn-logout-sm" onclick="handleLogout()">
+        <button class="btn-logout-sm" id="mobileLogoutBtn" onclick="handleLogout()">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="18" height="18"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        </button>
+        <button class="btn-logout-sm btn-login-mobile" id="mobileLoginBtn" onclick="exitGuestMode()" style="display:none;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="18" height="18"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
         </button>
     </div>
 
@@ -262,7 +291,20 @@
                 <h1 class="page-title" id="pageTitle">Overview</h1>
                 <p class="page-subtitle" id="pageSubtitle">Your financial summary at a glance</p>
             </div>
-            <div class="header-time" id="headerTime"></div>
+            <div style="display:flex;align-items:center;gap:12px;">
+                <div class="header-time" id="headerTime"></div>
+                <!-- Login button shown only in guest mode -->
+                <button class="btn-header-login" id="btnHeaderLogin" onclick="exitGuestMode()" style="display:none;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="15" height="15"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+                    Login
+                </button>
+            </div>
+        </div>
+
+        <!-- Guest mode banner -->
+        <div id="guestBanner" style="display:none;" class="guest-banner">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+            You're browsing as a guest — data is not saved. <button onclick="exitGuestMode()">Sign in</button> to unlock all features including 6-Month Forecast.
         </div>
 
         <!-- Stat Cards -->
@@ -593,6 +635,20 @@
         <!-- FORECAST TAB -->
         <div id="forecastTab" class="tab-content">
 
+            <!-- Guest login gate (shown instead of forecast for guests) -->
+            <div id="forecastLoginGate" style="display:none;" class="forecast-login-gate">
+                <div class="forecast-gate-icon">
+                    <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                </div>
+                <h2>Sign in to unlock 6-Month Forecast</h2>
+                <p>The AI-powered forecast uses your personal expense history to predict the next 6 months. Create a free account or sign in to access this feature.</p>
+                <button class="btn-submit" style="max-width:240px;margin:0 auto;" onclick="exitGuestMode(true)">
+                    <span>Login / Sign Up</span>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </button>
+                <p style="margin-top:16px;font-size:.82rem;color:var(--text-muted);">It's free — no credit card required.</p>
+            </div>
+
             <!-- Hero card -->
             <div class="card forecast-hero-card">
                 <div class="forecast-hero-header">
@@ -680,6 +736,49 @@
                     <div style="font-size:.85rem">Add at least 1 month of expenses in the <strong>Expenses</strong> tab to generate a forecast.</div>
                 </div>
             </div>
+        </div>
+
+        <!-- SUGGESTIONS TAB -->
+        <div id="suggestionsTab" class="tab-content">
+
+            <!-- Tips banner -->
+            <div class="card" style="background:linear-gradient(135deg,var(--surface-2),var(--surface-3));border:1px solid var(--border);">
+                <div style="display:flex;align-items:center;gap:14px;">
+                    <div style="width:48px;height:48px;border-radius:12px;background:rgba(99,102,241,.15);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+                    </div>
+                    <div>
+                        <div style="font-weight:600;font-size:.95rem;color:var(--text-primary)">Smart Finance Suggestions</div>
+                        <div style="font-size:.82rem;color:var(--text-muted);margin-top:2px;">Curated platforms to invest, save and grow — filtered for the Indian market</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filter tabs -->
+            <div id="suggFilterRow" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px;">
+                <button class="sugg-tab active" onclick="filterSugg('all',this)">All</button>
+                <button class="sugg-tab" onclick="filterSugg('stocks',this)">Stocks</button>
+                <button class="sugg-tab" onclick="filterSugg('mf',this)">Mutual funds</button>
+                <button class="sugg-tab" onclick="filterSugg('savings',this)">Savings & FD</button>
+                <button class="sugg-tab" onclick="filterSugg('learn',this)">Learn</button>
+            </div>
+
+            <!-- Platform cards grid -->
+            <div id="suggCards" class="sugg-grid"></div>
+
+            <!-- Tips section -->
+            <div class="card" style="margin-top:8px;">
+                <div class="card-header"><span>Smart money tips</span></div>
+                <div style="display:flex;flex-direction:column;gap:10px;margin-top:4px;">
+                    <div class="tip-row"><div class="tip-num">1</div><div class="tip-text">Keep 3–6 months of expenses as an emergency fund before investing in equities.</div></div>
+                    <div class="tip-row"><div class="tip-num">2</div><div class="tip-text">If your savings ratio is below 20%, cut discretionary spending before adding new investments.</div></div>
+                    <div class="tip-row"><div class="tip-num">3</div><div class="tip-text">SIPs in index funds beat most actively managed funds over a 10+ year horizon.</div></div>
+                    <div class="tip-row"><div class="tip-num">4</div><div class="tip-text">Max out your 80C limit (₹1.5L) via ELSS funds — tax savings plus equity returns in one go.</div></div>
+                    <div class="tip-row"><div class="tip-num">5</div><div class="tip-text">Rebalance your portfolio once a year — equities grow faster and can skew your target allocation.</div></div>
+                    <div class="tip-row"><div class="tip-num">6</div><div class="tip-text">Never invest money you'll need within 3 years in equity — use FDs or liquid funds instead.</div></div>
+                </div>
+            </div>
+
         </div>
 
     </main>
