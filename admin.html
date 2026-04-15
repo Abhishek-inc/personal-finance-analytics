@@ -3,713 +3,799 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FinanceHub — Admin Panel</title>
+    <title>FinanceHub — Smart Money Dashboard</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Fira+Code:wght@400;500;600&family=Playfair+Display:wght@700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="admin.css">
-
-    <style>
-        /* Inline SVG icon sizing utility */
-        .icon {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-        }
-        .icon svg {
-            width: 1em;
-            height: 1em;
-            fill: none;
-            stroke: currentColor;
-            stroke-width: 1.75;
-            stroke-linecap: round;
-            stroke-linejoin: round;
-            vertical-align: middle;
-        }
-        /* Stat card icons use a slightly larger size */
-        .admin-stat-icon .icon svg {
-            width: 1.5em;
-            height: 1.5em;
-        }
-        /* Nav item icon */
-        .admin-nav-item .icon svg {
-            width: 1.1em;
-            height: 1.1em;
-        }
-    </style>
 </head>
 <body>
 
-<!-- ═══ AUTH GATE ════════════════════════════════════════════ -->
-<div id="adminAuthGate" class="admin-auth-gate">
-    <div class="admin-auth-box">
+<!-- CURSOR GLOW -->
+<div class="cursor-glow" id="cursorGlow"></div>
 
-        <!-- Shield icon replacing 🛡️ -->
-        <div class="admin-auth-icon">
-            <span class="icon">
-                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-                </svg>
-            </span>
+<!-- PARTICLES BACKGROUND -->
+<div class="particles" id="particles"></div>
+
+<!-- AUTH SCREEN -->
+<div id="authContainer" class="auth-container">
+
+    <!-- Left panel -->
+    <div class="auth-panel auth-left">
+        <div class="auth-brand">
+            <div class="fh-logo" style="margin-bottom:12px;animation:iconBob 3s ease-in-out infinite;">
+                <div class="fh-logo-icon">
+                    <svg width="68" height="68" viewBox="0 0 70 70" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <linearGradient id="logoGradA" x1="0" y1="0" x2="70" y2="70" gradientUnits="userSpaceOnUse">
+                                <stop offset="0%" stop-color="#a78bfa"/>
+                                <stop offset="100%" stop-color="#60a5fa"/>
+                            </linearGradient>
+                            <filter id="glowA"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+                        </defs>
+                        <circle cx="35" cy="35" r="33" stroke="url(#logoGradA)" stroke-width="1.5" stroke-dasharray="4 3" opacity="0.5"/>
+                        <circle cx="35" cy="35" r="28" fill="url(#logoGradA)" opacity="0.12"/>
+                        <rect x="17" y="32" width="7" height="16" rx="2" fill="url(#logoGradA)" opacity="0.7"/>
+                        <rect x="28" y="24" width="7" height="24" rx="2" fill="url(#logoGradA)" opacity="0.85"/>
+                        <rect x="39" y="18" width="7" height="30" rx="2" fill="url(#logoGradA)"/>
+                        <polyline points="20,28 31,20 42,14 53,16" stroke="#f59e0b" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" fill="none" filter="url(#glowA)" opacity="0.9"/>
+                        <circle cx="53" cy="16" r="3" fill="#f59e0b" filter="url(#glowA)"/>
+                    </svg>
+                </div>
+                <div class="fh-logo-text-wrap">
+                    <span class="fh-logo-name" style="font-size:2.8rem;">FinanceHub</span>
+                    <span class="fh-logo-tag">Your complete financial command center</span>
+                </div>
+            </div>
         </div>
 
-        <h2 class="admin-auth-title">Admin Access</h2>
-        <p class="admin-auth-sub">Sign in with your admin account</p>
-        <div id="adminAlertBox"></div>
-
-        <div class="form-group floating">
-            <input type="email" id="adminEmail" placeholder=" " autocomplete="email">
-            <label>Admin Email</label>
-            <!-- Mail icon replacing ✉️ -->
-            <span class="field-icon icon">
-                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <rect x="2" y="4" width="20" height="16" rx="2"/>
-                    <polyline points="2,4 12,13 22,4"/>
-                </svg>
-            </span>
+        <div class="auth-features">
+            <div class="feature-item">
+                <span class="fi-icon fi-chart"></span>
+                <div>
+                    <strong>Real-Time Tracking</strong>
+                    <p>Income, expenses &amp; savings synced live</p>
+                </div>
+            </div>
+            <div class="feature-item">
+                <span class="fi-icon fi-tax"></span>
+                <div>
+                    <strong>Smart Tax Calculator</strong>
+                    <p>Old vs New regime comparison</p>
+                </div>
+            </div>
+            <div class="feature-item">
+                <span class="fi-icon fi-health"></span>
+                <div>
+                    <strong>Health Score</strong>
+                    <p>AI-powered financial fitness analysis</p>
+                </div>
+            </div>
+            <div class="feature-item">
+                <span class="fi-icon fi-secure"></span>
+                <div>
+                    <strong>6-Month Forecast</strong>
+                    <p>Predict future expenses with ML trends</p>
+                </div>
+            </div>
         </div>
 
-        <div class="form-group floating">
-            <input type="password" id="adminPassword" placeholder=" " autocomplete="current-password">
-            <label>Password</label>
-            <!-- Eye icon replacing 👁️ -->
-            <span class="field-icon icon" id="toggleAdminPass" onclick="toggleAdminPass()">
-                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                    <circle cx="12" cy="12" r="3"/>
-                </svg>
-            </span>
+        <div class="auth-bg-orb orb1"></div>
+        <div class="auth-bg-orb orb2"></div>
+    </div>
+
+    <!-- Right panel -->
+    <div class="auth-panel auth-right">
+        <div class="auth-box" id="authBox">
+            <div id="alertBox"></div>
+
+            <!-- Login Form -->
+            <div id="loginForm" class="auth-form active">
+                <div class="form-header">
+                    <h2>Welcome back</h2>
+                    <p>Sign in to your account</p>
+                </div>
+
+                <div class="form-group floating">
+                    <input type="email" id="loginEmail" placeholder=" " autocomplete="email">
+                    <label>Email address</label>
+                    <span class="field-icon field-icon-mail"></span>
+                </div>
+                <div class="form-group floating">
+                    <input type="password" id="loginPassword" placeholder=" " autocomplete="current-password">
+                    <label>Password</label>
+                    <span class="field-icon field-icon-eye" id="toggleLoginPass" onclick="togglePass('loginPassword','toggleLoginPass')"></span>
+                </div>
+
+                <button class="btn-submit" id="loginBtn" onclick="handleLogin()">
+                    <span>Sign In</span>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </button>
+
+                <div class="guest-divider"><span>or</span></div>
+                <button class="btn-guest" onclick="enterGuestMode()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+                    Continue as Guest
+                </button>
+
+                <p class="auth-switch">Don't have an account? <button onclick="toggleAuthForm()">Create one</button></p>
+            </div>
+
+            <!-- Register Form -->
+            <div id="registerForm" class="auth-form">
+                <div class="form-header">
+                    <h2>Get started</h2>
+                    <p>Create your free account</p>
+                </div>
+
+                <div class="form-group floating">
+                    <input type="text" id="registerName" placeholder=" " autocomplete="name">
+                    <label>Full name</label>
+                    <span class="field-icon field-icon-user"></span>
+                </div>
+                <div class="form-group floating">
+                    <input type="email" id="registerEmail" placeholder=" " autocomplete="email">
+                    <label>Email address</label>
+                    <span class="field-icon field-icon-mail"></span>
+                </div>
+                <div class="form-group floating">
+                    <input type="password" id="registerPassword" placeholder=" " autocomplete="new-password">
+                    <label>Password (min 6 chars)</label>
+                    <span class="field-icon field-icon-eye" id="toggleRegPass" onclick="togglePass('registerPassword','toggleRegPass')"></span>
+                </div>
+
+                <div class="password-strength" id="passStrength">
+                    <div class="strength-bar"><div class="strength-fill" id="strengthFill"></div></div>
+                    <span id="strengthLabel">Enter a password</span>
+                </div>
+
+                <button class="btn-submit" id="registerBtn" onclick="handleRegister()">
+                    <span>Create Account</span>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </button>
+
+                <p class="auth-switch">Already have an account? <button onclick="toggleAuthForm()">Sign in</button></p>
+            </div>
         </div>
-
-        <button class="btn-submit" id="adminLoginBtn" onclick="handleAdminLogin()">
-            <span>Access Admin Panel</span>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-        </button>
-
-        <p style="text-align:center;margin-top:16px;font-size:.8rem;color:var(--text-muted)">
-            Not an admin? <a href="index.html" style="color:var(--accent)">Go to main app</a>
-        </p>
     </div>
 </div>
 
-<!-- ═══ ADMIN DASHBOARD ══════════════════════════════════════ -->
-<div id="adminDashboard" class="admin-dashboard hidden">
+<!-- DASHBOARD -->
+<div id="dashboardContainer" class="dashboard hidden">
 
-    <!-- Top Bar -->
-    <div class="admin-topbar">
-        <div class="admin-brand">
-            <!-- Shield brand icon replacing 🛡️ -->
-            <span class="admin-shield icon">
-                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-                </svg>
-            </span>
-            <span>FinanceHub <strong>Admin</strong></span>
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-brand">
+            <div class="fh-logo">
+                <div class="fh-logo-icon">
+                    <svg width="36" height="36" viewBox="0 0 70 70" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <linearGradient id="logoGradS" x1="0" y1="0" x2="70" y2="70" gradientUnits="userSpaceOnUse">
+                                <stop offset="0%" stop-color="#a78bfa"/>
+                                <stop offset="100%" stop-color="#60a5fa"/>
+                            </linearGradient>
+                        </defs>
+                        <circle cx="35" cy="35" r="28" fill="url(#logoGradS)" opacity="0.15"/>
+                        <rect x="17" y="32" width="7" height="16" rx="2" fill="url(#logoGradS)" opacity="0.7"/>
+                        <rect x="28" y="24" width="7" height="24" rx="2" fill="url(#logoGradS)" opacity="0.85"/>
+                        <rect x="39" y="18" width="7" height="30" rx="2" fill="url(#logoGradS)"/>
+                        <polyline points="20,28 31,20 42,14 53,16" stroke="#f59e0b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity="0.9"/>
+                        <circle cx="53" cy="16" r="3" fill="#f59e0b"/>
+                    </svg>
+                </div>
+                <div class="fh-logo-text-wrap">
+                    <span class="fh-logo-name" style="font-size:1.3rem;">FinanceHub</span>
+                </div>
+            </div>
         </div>
-        <div class="admin-topbar-right">
-            <span class="admin-badge">Administrator</span>
-            <span id="adminUserEmail" style="font-size:.82rem;color:var(--text-muted)"></span>
-            <button class="btn-logout" onclick="handleAdminLogout()" title="Logout" style="margin-left:8px">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-                    <polyline points="16 17 21 12 16 7"/>
-                    <line x1="21" y1="12" x2="9" y2="12"/>
-                </svg>
+
+        <nav class="sidebar-nav">
+            <button class="nav-item active" onclick="switchTab('overview',this)" data-tab="overview">
+                <span class="nav-icon nav-icon-overview"></span>
+                <span class="nav-label">Overview</span>
+                <span class="nav-indicator"></span>
+            </button>
+            <button class="nav-item" onclick="switchTab('income',this)" data-tab="income">
+                <span class="nav-icon nav-icon-income"></span>
+                <span class="nav-label">Income</span>
+                <span class="nav-indicator"></span>
+            </button>
+            <button class="nav-item" onclick="switchTab('expenses',this)" data-tab="expenses">
+                <span class="nav-icon nav-icon-expenses"></span>
+                <span class="nav-label">Expenses</span>
+                <span class="nav-indicator"></span>
+            </button>
+            <button class="nav-item" onclick="switchTab('savings',this)" data-tab="savings">
+                <span class="nav-icon nav-icon-savings"></span>
+                <span class="nav-label">Savings</span>
+                <span class="nav-indicator"></span>
+            </button>
+            <button class="nav-item" onclick="switchTab('tax',this)" data-tab="tax">
+                <span class="nav-icon nav-icon-tax"></span>
+                <span class="nav-label">Tax</span>
+                <span class="nav-indicator"></span>
+            </button>
+            <button class="nav-item" onclick="switchTab('health',this)" data-tab="health">
+                <span class="nav-icon nav-icon-health"></span>
+                <span class="nav-label">Health Score</span>
+                <span class="nav-indicator"></span>
+            </button>
+            <button class="nav-item" onclick="switchTab('forecast',this)" data-tab="forecast">
+                <span class="nav-icon nav-icon-forecast"></span>
+                <span class="nav-label">6M Forecast</span>
+                <span class="nav-indicator"></span>
+                <span class="nav-new-badge">NEW</span>
+            </button>
+            <button class="nav-item" onclick="switchTab('suggestions',this)" data-tab="suggestions">
+                <span class="nav-icon nav-icon-suggestions"></span>
+                <span class="nav-label">Suggestions</span>
+                <span class="nav-indicator"></span>
+                <span class="nav-new-badge" style="background:#10b981;">LIVE</span>
+            </button>
+        </nav>
+
+        <!-- Hidden Admin Link — only visible to admin emails -->
+        <a id="adminPanelLink" href="admin.html" class="admin-panel-link hidden" title="Admin Panel">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            <span>Admin Panel</span>
+        </a>
+
+        <div class="sidebar-footer" id="sidebarFooter">
+            <!-- Logged-in user pill (default hidden in guest mode) -->
+            <div class="user-pill" id="userPill">
+                <div class="user-avatar" id="userAvatar">U</div>
+                <div class="user-info">
+                    <span class="user-name" id="userName">User</span>
+                    <span class="user-role" id="userRole">Member</span>
+                </div>
+            </div>
+            <!-- Guest footer -->
+            <div class="guest-footer" id="guestFooter" style="display:none;">
+                <div class="guest-info">
+                    <div class="user-avatar guest-avatar">G</div>
+                    <div class="user-info">
+                        <span class="user-name">Guest</span>
+                        <span class="user-role" style="color:var(--accent)">View Only</span>
+                    </div>
+                </div>
+                <button class="btn-login-sm" onclick="exitGuestMode()" title="Login">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="16" height="16"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+                </button>
+            </div>
+            <button class="btn-logout" id="btnLogout" onclick="handleLogout()" title="Logout">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
             </button>
         </div>
+    </aside>
+
+    <!-- Mobile Topbar -->
+    <div class="mobile-topbar">
+        <button class="hamburger" id="hamburger" onclick="toggleSidebar()">
+            <span></span><span></span><span></span>
+        </button>
+        <span class="mobile-brand" style="font-family:'Playfair Display',serif;">FinanceHub</span>
+        <button class="btn-logout-sm" id="mobileLogoutBtn" onclick="handleLogout()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="18" height="18"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        </button>
+        <button class="btn-logout-sm btn-login-mobile" id="mobileLoginBtn" onclick="exitGuestMode()" style="display:none;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="18" height="18"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+        </button>
     </div>
 
-    <!-- Main -->
-    <div class="admin-main">
+    <!-- Main content -->
+    <main class="main-content" id="mainContent">
 
-        <!-- Sidebar -->
-        <aside class="admin-sidebar">
-            <nav class="admin-nav">
-
-                <!-- Overview — bar-chart icon replacing 📊 -->
-                <button class="admin-nav-item active" onclick="adminSwitchTab('overview', this)">
-                    <span class="icon">
-                        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <rect x="3" y="12" width="4" height="9"/><rect x="10" y="7" width="4" height="14"/><rect x="17" y="3" width="4" height="18"/>
-                        </svg>
-                    </span>
-                    Overview
+        <!-- Page header -->
+        <div class="page-header">
+            <div>
+                <h1 class="page-title" id="pageTitle">Overview</h1>
+                <p class="page-subtitle" id="pageSubtitle">Your financial summary at a glance</p>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;">
+                <div class="header-time" id="headerTime"></div>
+                <!-- Login button shown only in guest mode -->
+                <button class="btn-header-login" id="btnHeaderLogin" onclick="exitGuestMode()" style="display:none;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="15" height="15"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+                    Login
                 </button>
+            </div>
+        </div>
 
-                <!-- All Users — users icon replacing 👥 -->
-                <button class="admin-nav-item" onclick="adminSwitchTab('users', this)">
-                    <span class="icon">
-                        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-                            <circle cx="9" cy="7" r="4"/>
-                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-                            <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-                        </svg>
-                    </span>
-                    All Users
+        <!-- Guest mode banner -->
+        <div id="guestBanner" style="display:none;" class="guest-banner">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+            You're browsing as a guest — data is not saved. <button onclick="exitGuestMode()">Sign in</button> to unlock all features including 6-Month Forecast.
+        </div>
+
+        <!-- Stat Cards -->
+        <div class="stats-grid" id="statsGrid">
+            <div class="stat-card" style="--delay:0s">
+                <div class="stat-icon stat-icon-income"></div>
+                <div class="stat-body">
+                    <span class="stat-label">Annual Income</span>
+                    <span class="stat-value" id="statIncome">&#8377;0</span>
+                </div>
+                <div class="stat-trend up">Active</div>
+            </div>
+            <div class="stat-card" style="--delay:.1s">
+                <div class="stat-icon stat-icon-expense"></div>
+                <div class="stat-body">
+                    <span class="stat-label">Avg Monthly Expense</span>
+                    <span class="stat-value" id="statExpense">&#8377;0</span>
+                </div>
+                <div class="stat-trend neutral">Monthly</div>
+            </div>
+            <div class="stat-card" style="--delay:.2s">
+                <div class="stat-icon stat-icon-savings"></div>
+                <div class="stat-body">
+                    <span class="stat-label">Total Savings</span>
+                    <span class="stat-value" id="statSavings">&#8377;0</span>
+                </div>
+                <div class="stat-trend up">Growing</div>
+            </div>
+            <div class="stat-card accent" style="--delay:.3s">
+                <div class="stat-icon stat-icon-health"></div>
+                <div class="stat-body">
+                    <span class="stat-label">Health Score</span>
+                    <span class="stat-value" id="statHealth">&#8212;</span>
+                </div>
+                <div class="stat-trend" id="statHealthBadge">/ 100</div>
+            </div>
+        </div>
+
+        <!-- Tab Contents -->
+
+        <!-- OVERVIEW TAB -->
+        <div id="overviewTab" class="tab-content active">
+            <div class="card">
+                <div class="card-header">
+                    <span>Summary</span>
+                    <span class="card-badge">Live</span>
+                </div>
+                <div id="overviewContent" class="loading-state">
+                    <div class="skeleton"></div>
+                    <div class="skeleton short"></div>
+                    <div class="skeleton"></div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-header">
+                    <span>Recent Expenses</span>
+                    <button class="card-action" onclick="switchTab('expenses', document.querySelector('[data-tab=expenses]'))">View all &rarr;</button>
+                </div>
+                <div id="recentExpenses" class="loading-state">
+                    <div class="skeleton"></div>
+                    <div class="skeleton short"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- INCOME TAB -->
+        <div id="incomeTab" class="tab-content">
+            <div class="grid-2">
+
+                <div class="card">
+                    <div class="card-header"><span>Add / Update Income</span></div>
+                    <div class="form-grid">
+
+                        <div class="form-group-inline">
+                            <label class="tip-label">
+                                Financial Year
+                                <span class="tip-icon" data-tip="inc-fy">i</span>
+                                <div class="tooltip" id="tip-inc-fy">
+                                    <div class="tt-title">Financial Year</div>
+                                    <div class="tt-body">Enter the Indian financial year in format <strong>YYYY-YY</strong> (e.g. 2024-25). The Indian FY runs from <strong>1 April to 31 March</strong>.</div>
+                                </div>
+                            </label>
+                            <input id="incYear" value="2024-25" class="inp">
+                        </div>
+
+                        <div class="form-group-inline">
+                            <label class="tip-label">
+                                Salary (&#8377;) <span class="period-badge badge-annual">Annual</span>
+                                <span class="tip-icon" data-tip="inc-sal">i</span>
+                                <div class="tooltip" id="tip-inc-sal">
+                                    <div class="tt-title">Gross Annual Salary</div>
+                                    <div class="tt-body">Enter your <strong>total annual CTC or gross salary</strong> before any deductions.</div>
+                                </div>
+                            </label>
+                            <div class="field-hint">Total yearly CTC / gross pay</div>
+                            <input type="number" id="salary" placeholder="800000" class="inp">
+                        </div>
+
+                        <div class="form-group-inline">
+                            <label class="tip-label">
+                                Bonus (&#8377;) <span class="period-badge badge-lumpsum">Lump-sum</span>
+                                <span class="tip-icon" data-tip="inc-bon">i</span>
+                                <div class="tooltip" id="tip-inc-bon">
+                                    <div class="tt-title">Performance Bonus</div>
+                                    <div class="tt-body">Any <strong>performance bonus, joining bonus, or incentive</strong> received during the year.</div>
+                                </div>
+                            </label>
+                            <div class="field-hint">One-time / annual performance bonus</div>
+                            <input type="number" id="bonus" value="0" class="inp">
+                        </div>
+
+                        <div class="form-group-inline">
+                            <label class="tip-label">
+                                Rental Income (&#8377;) <span class="period-badge badge-annual">Annual</span>
+                                <span class="tip-icon" data-tip="inc-rent">i</span>
+                                <div class="tooltip" id="tip-inc-rent">
+                                    <div class="tt-title">Annual Rental Income</div>
+                                    <div class="tt-body">Total annual rent received from any property you own.</div>
+                                </div>
+                            </label>
+                            <div class="field-hint">Total rent received for the full year</div>
+                            <input type="number" id="rental" value="0" class="inp">
+                        </div>
+
+                        <div class="form-group-inline">
+                            <label class="tip-label">
+                                Capital Gains (&#8377;) <span class="period-badge badge-lumpsum">Lump-sum</span>
+                                <span class="tip-icon" data-tip="inc-cg">i</span>
+                                <div class="tooltip" id="tip-inc-cg">
+                                    <div class="tt-title">Capital Gains</div>
+                                    <div class="tt-body">Profit from selling <strong>stocks, mutual funds, property, or gold</strong>.</div>
+                                </div>
+                            </label>
+                            <div class="field-hint">Profit from selling assets (stocks, MF, property)</div>
+                            <input type="number" id="capgains" value="0" class="inp">
+                        </div>
+
+                        <div class="form-group-inline">
+                            <label class="tip-label">
+                                Other Income (&#8377;) <span class="period-badge badge-annual">Annual</span>
+                                <span class="tip-icon" data-tip="inc-oth">i</span>
+                                <div class="tooltip" id="tip-inc-oth">
+                                    <div class="tt-title">Other Annual Income</div>
+                                    <div class="tt-body">Include: <strong>bank FD interest, savings account interest, freelance income, dividends.</strong></div>
+                                </div>
+                            </label>
+                            <div class="field-hint">FD interest, freelance, dividends, etc. for year</div>
+                            <input type="number" id="otherinc" value="0" class="inp">
+                        </div>
+
+                    </div>
+                    <button class="btn-action" onclick="saveIncome()">Save Income</button>
+                </div>
+
+                <div class="card">
+                    <div class="card-header"><span>Tax Deductions</span></div>
+                    <div class="form-grid">
+
+                        <div class="form-group-inline">
+                            <label class="tip-label">
+                                Section 80C (&#8377;) <span class="period-badge badge-annual">Annual</span>
+                                <span class="tip-icon" data-tip="ded-80c">i</span>
+                                <div class="tooltip" id="tip-ded-80c">
+                                    <div class="tt-title">Section 80C — Max &#8377;1,50,000</div>
+                                    <div class="tt-body">Covers: <strong>EPF, PPF, ELSS mutual funds, LIC premium, NSC, 5-year FD, tuition fees, home loan principal repayment.</strong></div>
+                                    <div class="tt-limit">Maximum limit: &#8377;1,50,000/year</div>
+                                </div>
+                            </label>
+                            <div class="field-hint">EPF, PPF, ELSS, LIC, NSC — max &#8377;1.5L/year</div>
+                            <input type="number" id="d80c" value="0" class="inp">
+                        </div>
+
+                        <div class="form-group-inline">
+                            <label class="tip-label">
+                                Section 80D (&#8377;) <span class="period-badge badge-annual">Annual</span>
+                                <span class="tip-icon" data-tip="ded-80d">i</span>
+                                <div class="tooltip" id="tip-ded-80d">
+                                    <div class="tt-title">Section 80D — Health Insurance</div>
+                                    <div class="tt-body">Deduction for <strong>health insurance premiums</strong> paid for yourself, spouse, children, and parents.</div>
+                                    <div class="tt-limit">Self+family: &#8377;25,000 | Senior citizen parents: +&#8377;50,000</div>
+                                </div>
+                            </label>
+                            <div class="field-hint">Annual health insurance premium paid</div>
+                            <input type="number" id="d80d" value="0" class="inp">
+                        </div>
+
+                        <div class="form-group-inline">
+                            <label class="tip-label">
+                                Section 80G (&#8377;) <span class="period-badge badge-lumpsum">Lump-sum</span>
+                                <span class="tip-icon" data-tip="ded-80g">i</span>
+                                <div class="tooltip" id="tip-ded-80g">
+                                    <div class="tt-title">Section 80G — Donations</div>
+                                    <div class="tt-body">Deduction for <strong>donations to approved charitable organisations</strong>.</div>
+                                </div>
+                            </label>
+                            <div class="field-hint">Donations to approved charities / NGOs</div>
+                            <input type="number" id="d80g" value="0" class="inp">
+                        </div>
+
+                        <div class="form-group-inline">
+                            <label class="tip-label">
+                                Home Loan Interest (&#8377;) <span class="period-badge badge-annual">Annual</span>
+                                <span class="tip-icon" data-tip="ded-24">i</span>
+                                <div class="tooltip" id="tip-ded-24">
+                                    <div class="tt-title">Section 24(b) — Home Loan Interest</div>
+                                    <div class="tt-body">Deduction on <strong>annual interest paid on home loan</strong> for a self-occupied property.</div>
+                                    <div class="tt-limit">Self-occupied: Max &#8377;2,00,000/year</div>
+                                </div>
+                            </label>
+                            <div class="field-hint">Annual home loan interest paid — max &#8377;2L</div>
+                            <input type="number" id="d24" value="0" class="inp">
+                        </div>
+
+                        <div class="form-group-inline">
+                            <label class="tip-label">
+                                NPS 80CCD (&#8377;) <span class="period-badge badge-annual">Annual</span>
+                                <span class="tip-icon" data-tip="ded-nps">i</span>
+                                <div class="tooltip" id="tip-ded-nps">
+                                    <div class="tt-title">Section 80CCD(1B) — NPS</div>
+                                    <div class="tt-body">Additional deduction for annual contributions to <strong>National Pension Scheme (NPS) Tier-1</strong> account.</div>
+                                    <div class="tt-limit">Extra limit: &#8377;50,000/year (on top of 80C)</div>
+                                </div>
+                            </label>
+                            <div class="field-hint">Annual NPS Tier-1 contribution — max &#8377;50K extra</div>
+                            <input type="number" id="dnps" value="0" class="inp">
+                        </div>
+
+                        <div class="form-group-inline">
+                            <label class="tip-label">
+                                HRA Exemption (&#8377;) <span class="period-badge badge-annual">Annual</span>
+                                <span class="tip-icon" data-tip="ded-hra">i</span>
+                                <div class="tooltip" id="tip-ded-hra">
+                                    <div class="tt-title">HRA — House Rent Allowance</div>
+                                    <div class="tt-body">If you receive HRA from your employer and pay rent, a portion is <strong>exempt from tax</strong>.</div>
+                                </div>
+                            </label>
+                            <div class="field-hint">Annual HRA exempt portion (check Form 16)</div>
+                            <input type="number" id="dhra" value="0" class="inp">
+                        </div>
+
+                    </div>
+                    <button class="btn-action" onclick="saveDeductions()">Save Deductions</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header"><span>Saved Income Records</span></div>
+                <div id="incomeTable" class="loading-state"><div class="skeleton"></div></div>
+            </div>
+
+            <div class="card">
+                <div class="card-header"><span>Saved Tax Deduction Records</span></div>
+                <div id="deductionTable" class="loading-state"><div class="skeleton"></div></div>
+            </div>
+        </div>
+
+        <!-- EXPENSES TAB -->
+        <div id="expensesTab" class="tab-content">
+            <div class="card">
+                <div class="card-header"><span>Add Monthly Expenses</span></div>
+                <div class="form-grid-3">
+                    <div class="form-group-inline">
+                        <label class="tip-label">Month-Year (YYYY-MM)<span class="tip-icon" data-tip="exp-mo">i</span><div class="tooltip" id="tip-exp-mo"><div class="tt-title">Month-Year Format</div><div class="tt-body">Enter the month in <strong>YYYY-MM</strong> format.</div><div class="tt-example">Example: 2024-12 for December 2024</div></div></label>
+                        <input id="expMonth" placeholder="2024-12" class="inp">
+                    </div>
+                    <div class="form-group-inline"><label>Rent (&#8377;)</label><input type="number" id="eRent" value="0" class="inp"></div>
+                    <div class="form-group-inline"><label>Groceries (&#8377;)</label><input type="number" id="eGrocery" value="0" class="inp"></div>
+                    <div class="form-group-inline"><label>Utilities (&#8377;)</label><input type="number" id="eUtil" value="0" class="inp"></div>
+                    <div class="form-group-inline"><label>Transportation (&#8377;)</label><input type="number" id="eTrans" value="0" class="inp"></div>
+                    <div class="form-group-inline"><label>Entertainment (&#8377;)</label><input type="number" id="eEnt" value="0" class="inp"></div>
+                    <div class="form-group-inline"><label>Healthcare (&#8377;)</label><input type="number" id="eHealth" value="0" class="inp"></div>
+                    <div class="form-group-inline"><label>Education (&#8377;)</label><input type="number" id="eEdu" value="0" class="inp"></div>
+                </div>
+                <button class="btn-action" onclick="saveExpense()">Save Expenses</button>
+            </div>
+            <div class="card">
+                <div class="card-header"><span>Expense History</span></div>
+                <div id="expenseTable" class="loading-state"><div class="skeleton"></div></div>
+            </div>
+        </div>
+
+        <!-- SAVINGS TAB -->
+        <div id="savingsTab" class="tab-content">
+            <div class="card">
+                <div class="card-header"><span>Add Monthly Savings</span></div>
+                <div class="form-grid-3">
+                    <div class="form-group-inline"><label>Month-Year (YYYY-MM)</label><input id="savMonth" placeholder="2024-12" class="inp"></div>
+                    <div class="form-group-inline"><label>Fixed Deposits (&#8377;)</label><input type="number" id="sFD" value="0" class="inp"></div>
+                    <div class="form-group-inline"><label>Mutual Funds (&#8377;)</label><input type="number" id="sMF" value="0" class="inp"></div>
+                    <div class="form-group-inline"><label>PPF (&#8377;)</label><input type="number" id="sPPF" value="0" class="inp"></div>
+                    <div class="form-group-inline"><label>Stocks (&#8377;)</label><input type="number" id="sStocks" value="0" class="inp"></div>
+                    <div class="form-group-inline"><label>Gold (&#8377;)</label><input type="number" id="sGold" value="0" class="inp"></div>
+                    <div class="form-group-inline"><label>Emergency Fund (&#8377;)</label><input type="number" id="sEmerg" value="0" class="inp"></div>
+                </div>
+                <button class="btn-action" onclick="saveSavings()">Save Savings</button>
+            </div>
+            <div class="card">
+                <div class="card-header"><span>Savings History</span></div>
+                <div id="savingsTable" class="loading-state"><div class="skeleton"></div></div>
+            </div>
+        </div>
+
+        <!-- TAX TAB -->
+        <div id="taxTab" class="tab-content">
+            <div class="card">
+                <div class="card-header"><span>Tax Calculator</span></div>
+                <div class="tax-input-row">
+                    <div class="form-group-inline" style="max-width:280px">
+                        <label>Financial Year</label>
+                        <input id="taxYear" value="2024-25" class="inp">
+                    </div>
+                    <button class="btn-action" onclick="calculateTax()">Calculate Tax</button>
+                </div>
+                <div id="taxResult" style="margin-top:25px;"></div>
+            </div>
+        </div>
+
+        <!-- HEALTH TAB -->
+        <div id="healthTab" class="tab-content">
+            <div class="card">
+                <div class="card-header"><span>Financial Health Score</span></div>
+                <p style="color:var(--text-muted);margin-bottom:20px;font-size:0.9rem;">Based on your savings ratio, expense ratio, and portfolio diversification.</p>
+                <button class="btn-action" onclick="calcHealth()">Analyse My Finances</button>
+                <div id="healthResult" style="margin-top:25px;"></div>
+            </div>
+        </div>
+
+        <!-- FORECAST TAB -->
+        <div id="forecastTab" class="tab-content">
+
+            <!-- Guest login gate (shown instead of forecast for guests) -->
+            <div id="forecastLoginGate" style="display:none;" class="forecast-login-gate">
+                <div class="forecast-gate-icon">
+                    <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                </div>
+                <h2>Sign in to unlock 6-Month Forecast</h2>
+                <p>The AI-powered forecast uses your personal expense history to predict the next 6 months. Create a free account or sign in to access this feature.</p>
+                <button class="btn-submit" style="max-width:240px;margin:0 auto;" onclick="exitGuestMode(true)">
+                    <span>Login / Sign Up</span>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                 </button>
+                <p style="margin-top:16px;font-size:.82rem;color:var(--text-muted);">It's free — no credit card required.</p>
+            </div>
 
-                <!-- Financials — dollar-sign icon replacing 💰 -->
-                <button class="admin-nav-item" onclick="adminSwitchTab('finances', this)">
-                    <span class="icon">
-                        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <rect x="2" y="7" width="20" height="14" rx="2"/>
-                            <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/>
-                            <line x1="12" y1="12" x2="12" y2="16"/>
-                            <line x1="10" y1="14" x2="14" y2="14"/>
+            <!-- Hero card -->
+            <div class="card forecast-hero-card">
+                <div class="forecast-hero-header">
+                    <div class="forecast-hero-icon">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/>
+                            <polyline points="16 7 22 7 22 13"/>
                         </svg>
-                    </span>
-                    Financials
-                </button>
-
-                <!-- Health Scores — activity icon replacing 💡 -->
-                <button class="admin-nav-item" onclick="adminSwitchTab('health', this)">
-                    <span class="icon">
-                        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
-                        </svg>
-                    </span>
-                    Health Scores
-                </button>
-
-                <!-- Export — download icon replacing 📥 -->
-                <button class="admin-nav-item" onclick="adminSwitchTab('export', this)">
-                    <span class="icon">
-                        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                            <polyline points="7 10 12 15 17 10"/>
-                            <line x1="12" y1="15" x2="12" y2="3"/>
-                        </svg>
-                    </span>
-                    Export Data
-                </button>
-
-            </nav>
-        </aside>
-
-        <!-- Content -->
-        <main class="admin-content">
-
-            <!-- OVERVIEW TAB -->
-            <div id="overviewTab" class="admin-tab active">
-                <div class="admin-page-header">
-                    <h1>
-                        <span class="icon">
-                            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style="width:1.2em;height:1.2em">
-                                <rect x="3" y="12" width="4" height="9"/><rect x="10" y="7" width="4" height="14"/><rect x="17" y="3" width="4" height="18"/>
-                            </svg>
-                        </span>
-                        Dashboard Overview
-                    </h1>
-                    <button class="btn-action" onclick="loadAllAdminData()">
-                        <!-- Refresh icon replacing 🔄 -->
-                        <span class="icon">
-                            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                <polyline points="23 4 23 10 17 10"/>
-                                <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
-                            </svg>
-                        </span>
-                        Refresh
+                    </div>
+                    <div>
+                        <div class="forecast-hero-title">6-Month Expense Forecast</div>
+                        <div class="forecast-hero-sub">AI-powered linear trend analysis on your historical expense data</div>
+                    </div>
+                    <button class="btn-action" id="btnRunForecast" onclick="runForecast()" style="margin-left:auto;white-space:nowrap;">
+                        Generate Forecast
                     </button>
                 </div>
-
-                <!-- Stat Cards -->
-                <div class="admin-stats-grid">
-
-                    <div class="admin-stat-card">
-                        <div class="admin-stat-icon icon">
-                            <!-- Users icon replacing 👥 -->
-                            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-                                <circle cx="9" cy="7" r="4"/>
-                                <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-                                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-                            </svg>
-                        </div>
-                        <div class="admin-stat-body">
-                            <span class="admin-stat-label">Total Users</span>
-                            <span class="admin-stat-val" id="statTotalUsers">—</span>
-                        </div>
-                    </div>
-
-                    <div class="admin-stat-card">
-                        <div class="admin-stat-icon icon">
-                            <!-- Briefcase icon replacing 💼 -->
-                            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                <rect x="2" y="7" width="20" height="14" rx="2"/>
-                                <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/>
-                            </svg>
-                        </div>
-                        <div class="admin-stat-body">
-                            <span class="admin-stat-label">Total Income Recorded</span>
-                            <span class="admin-stat-val" id="statTotalIncome">—</span>
-                        </div>
-                    </div>
-
-                    <div class="admin-stat-card">
-                        <div class="admin-stat-icon icon">
-                            <!-- Receipt icon replacing 🧾 -->
-                            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M14 2H6a2 2 0 0 0-2 2v16l3-2 2 2 2-2 2 2 2-2 3 2V4a2 2 0 0 0-2-2z"/>
-                                <line x1="9" y1="9" x2="15" y2="9"/>
-                                <line x1="9" y1="13" x2="15" y2="13"/>
-                            </svg>
-                        </div>
-                        <div class="admin-stat-body">
-                            <span class="admin-stat-label">Avg Monthly Expense</span>
-                            <span class="admin-stat-val" id="statAvgExpense">—</span>
-                        </div>
-                    </div>
-
-                    <div class="admin-stat-card accent">
-                        <div class="admin-stat-icon icon">
-                            <!-- Activity / health icon replacing 💡 -->
-                            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
-                            </svg>
-                        </div>
-                        <div class="admin-stat-body">
-                            <span class="admin-stat-label">Avg Health Score</span>
-                            <span class="admin-stat-val" id="statAvgHealth">—</span>
-                        </div>
-                    </div>
-
-                    <div class="admin-stat-card">
-                        <div class="admin-stat-icon icon">
-                            <!-- Bank / savings icon replacing 🏦 -->
-                            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                <polyline points="3 9 12 2 21 9"/>
-                                <rect x="3" y="9" width="18" height="11" rx="1"/>
-                                <line x1="3" y1="20" x2="21" y2="20"/>
-                                <line x1="7" y1="12" x2="7" y2="17"/>
-                                <line x1="12" y1="12" x2="12" y2="17"/>
-                                <line x1="17" y1="12" x2="17" y2="17"/>
-                            </svg>
-                        </div>
-                        <div class="admin-stat-body">
-                            <span class="admin-stat-label">Total Savings Recorded</span>
-                            <span class="admin-stat-val" id="statTotalSavings">—</span>
-                        </div>
-                    </div>
-
-                    <div class="admin-stat-card">
-                        <div class="admin-stat-icon icon">
-                            <!-- Clipboard icon replacing 📋 -->
-                            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
-                                <rect x="8" y="2" width="8" height="4" rx="1"/>
-                                <line x1="9" y1="12" x2="15" y2="12"/>
-                                <line x1="9" y1="16" x2="13" y2="16"/>
-                            </svg>
-                        </div>
-                        <div class="admin-stat-body">
-                            <span class="admin-stat-label">Total Expense Records</span>
-                            <span class="admin-stat-val" id="statTotalExpRecords">—</span>
-                        </div>
-                    </div>
-
-                </div>
-
-                <!-- Recent Activity -->
-                <div class="card" style="margin-top:24px">
-                    <div class="card-header">
-                        <span>
-                            <!-- Clock icon replacing 🕒 -->
-                            <span class="icon">
-                                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                    <circle cx="12" cy="12" r="10"/>
-                                    <polyline points="12 6 12 12 16 14"/>
-                                </svg>
-                            </span>
-                            Recently Joined Users
-                        </span>
-                    </div>
-                    <div id="recentUsersTable"><div class="skeleton"></div></div>
-                </div>
             </div>
 
-            <!-- USERS TAB -->
-            <div id="usersTab" class="admin-tab">
-                <div class="admin-page-header">
-                    <h1>
-                        <span class="icon">
-                            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style="width:1.2em;height:1.2em">
-                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-                                <circle cx="9" cy="7" r="4"/>
-                                <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-                                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-                            </svg>
-                        </span>
-                        All Users
-                    </h1>
-                    <div style="display:flex;gap:10px;align-items:center">
-                        <input id="userSearchInput" class="inp" placeholder="Search by email or name..."
-                            style="width:260px" oninput="filterUsers()">
+            <!-- Summary KPI cards -->
+            <div class="forecast-cards-grid" id="forecastSummaryCards"></div>
+
+            <div id="forecastResult" style="display:none;">
+
+                <!-- Row 1: Line chart + Donut -->
+                <div class="fcast-row-2">
+                    <div class="card fcast-main-card">
+                        <div class="card-header">
+                            <span>Monthly Expense Trend</span>
+                            <div class="fcast-legend" id="lineLegend"></div>
+                        </div>
+                        <div class="fcast-chart-wrap">
+                            <canvas id="forecastLineChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header"><span>Category Breakdown</span><span class="card-badge">Forecast</span></div>
+                        <div class="fcast-chart-wrap fcast-donut-wrap">
+                            <canvas id="forecastDonutChart"></canvas>
+                        </div>
+                        <div id="donutLegend" class="fcast-donut-legend"></div>
                     </div>
                 </div>
+
+                <!-- Row 2: Stacked bar chart -->
                 <div class="card">
-                    <div id="usersTableWrap"><div class="skeleton"></div><div class="skeleton short"></div></div>
-                </div>
-
-                <!-- User Detail Panel -->
-                <div id="userDetailPanel" class="user-detail-panel hidden">
-                    <div class="user-detail-header">
-                        <div class="user-detail-avatar" id="detailAvatar">U</div>
-                        <div>
-                            <div class="user-detail-name" id="detailName">—</div>
-                            <div class="user-detail-email" id="detailEmail">—</div>
-                            <div class="user-detail-joined" id="detailJoined">—</div>
-                        </div>
-                        <button class="btn-close-detail" onclick="closeUserDetail()">
-                            <!-- X icon replacing ✕ -->
-                            <span class="icon">
-                                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                    <line x1="18" y1="6" x2="6" y2="18"/>
-                                    <line x1="6" y1="6" x2="18" y2="18"/>
-                                </svg>
-                            </span>
-                            Close
-                        </button>
+                    <div class="card-header">
+                        <span>Stacked Category View</span>
+                        <span class="card-badge">6 Months</span>
                     </div>
-
-                    <div class="admin-stats-grid" style="margin:16px 0">
-
-                        <div class="admin-stat-card">
-                            <div class="admin-stat-icon icon">
-                                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                    <rect x="2" y="7" width="20" height="14" rx="2"/>
-                                    <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/>
-                                </svg>
-                            </div>
-                            <div class="admin-stat-body">
-                                <span class="admin-stat-label">Annual Income</span>
-                                <span class="admin-stat-val" id="detailIncome">—</span>
-                            </div>
-                        </div>
-
-                        <div class="admin-stat-card">
-                            <div class="admin-stat-icon icon">
-                                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M14 2H6a2 2 0 0 0-2 2v16l3-2 2 2 2-2 2 2 2-2 3 2V4a2 2 0 0 0-2-2z"/>
-                                    <line x1="9" y1="9" x2="15" y2="9"/>
-                                    <line x1="9" y1="13" x2="15" y2="13"/>
-                                </svg>
-                            </div>
-                            <div class="admin-stat-body">
-                                <span class="admin-stat-label">Avg Monthly Expense</span>
-                                <span class="admin-stat-val" id="detailExpense">—</span>
-                            </div>
-                        </div>
-
-                        <div class="admin-stat-card">
-                            <div class="admin-stat-icon icon">
-                                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                    <polyline points="3 9 12 2 21 9"/>
-                                    <rect x="3" y="9" width="18" height="11" rx="1"/>
-                                    <line x1="3" y1="20" x2="21" y2="20"/>
-                                    <line x1="7" y1="12" x2="7" y2="17"/>
-                                    <line x1="12" y1="12" x2="12" y2="17"/>
-                                    <line x1="17" y1="12" x2="17" y2="17"/>
-                                </svg>
-                            </div>
-                            <div class="admin-stat-body">
-                                <span class="admin-stat-label">Total Savings</span>
-                                <span class="admin-stat-val" id="detailSavings">—</span>
-                            </div>
-                        </div>
-
-                        <div class="admin-stat-card accent">
-                            <div class="admin-stat-icon icon">
-                                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
-                                </svg>
-                            </div>
-                            <div class="admin-stat-body">
-                                <span class="admin-stat-label">Health Score</span>
-                                <span class="admin-stat-val" id="detailHealth">—</span>
-                            </div>
-                        </div>
-
-                    </div>
-
-                    <div style="display:flex;gap:10px;margin-top:8px">
-                        <button class="btn-action"
-                            style="background:linear-gradient(135deg,var(--red),#c0392b);font-size:.82rem;padding:8px 16px"
-                            onclick="deleteUserData()">
-                            <!-- Trash icon replacing 🗑️ -->
-                            <span class="icon">
-                                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                    <polyline points="3 6 5 6 21 6"/>
-                                    <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
-                                    <path d="M10 11v6M14 11v6"/>
-                                    <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
-                                </svg>
-                            </span>
-                            Delete User Data
-                        </button>
+                    <div class="fcast-chart-wrap fcast-bar-wrap">
+                        <canvas id="forecastStackedBar"></canvas>
                     </div>
                 </div>
-            </div>
 
-            <!-- FINANCIALS TAB -->
-            <div id="financesTab" class="admin-tab">
-                <div class="admin-page-header">
-                    <h1>
-                        <span class="icon">
-                            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style="width:1.2em;height:1.2em">
-                                <line x1="12" y1="1" x2="12" y2="23"/>
-                                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
-                            </svg>
-                        </span>
-                        Financial Overview
-                    </h1>
-                </div>
+                <!-- Row 3: Category analysis + Insights -->
                 <div class="grid-2">
-
                     <div class="card">
-                        <div class="card-header">
-                            <span>
-                                <!-- Briefcase icon replacing 💼 -->
-                                <span class="icon">
-                                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                        <rect x="2" y="7" width="20" height="14" rx="2"/>
-                                        <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/>
-                                    </svg>
-                                </span>
-                                Top Earners
-                            </span>
-                        </div>
-                        <div id="topEarnersTable"><div class="skeleton"></div></div>
+                        <div class="card-header"><span>Category vs Historical</span></div>
+                        <div id="forecastCategories"></div>
                     </div>
-
                     <div class="card">
-                        <div class="card-header">
-                            <span>
-                                <!-- Receipt icon replacing 🧾 -->
-                                <span class="icon">
-                                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                        <path d="M14 2H6a2 2 0 0 0-2 2v16l3-2 2 2 2-2 2 2 2-2 3 2V4a2 2 0 0 0-2-2z"/>
-                                        <line x1="9" y1="9" x2="15" y2="9"/>
-                                        <line x1="9" y1="13" x2="15" y2="13"/>
-                                    </svg>
-                                </span>
-                                Highest Spenders
-                            </span>
-                        </div>
-                        <div id="topSpendersTable"><div class="skeleton"></div></div>
+                        <div class="card-header"><span>Smart Insights</span></div>
+                        <div id="forecastInsights"></div>
                     </div>
-
                 </div>
 
+                <!-- Row 4: Data table -->
                 <div class="card">
                     <div class="card-header">
-                        <span>
-                            <!-- Bank icon replacing 🏦 -->
-                            <span class="icon">
-                                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                    <polyline points="3 9 12 2 21 9"/>
-                                    <rect x="3" y="9" width="18" height="11" rx="1"/>
-                                    <line x1="3" y1="20" x2="21" y2="20"/>
-                                    <line x1="7" y1="12" x2="7" y2="17"/>
-                                    <line x1="12" y1="12" x2="12" y2="17"/>
-                                    <line x1="17" y1="12" x2="17" y2="17"/>
-                                </svg>
-                            </span>
-                            Top Savers
-                        </span>
+                        <span>Month-by-Month Breakdown</span>
+                        <span class="card-badge">Forecast</span>
                     </div>
-                    <div id="topSaversTable"><div class="skeleton"></div></div>
+                    <div id="forecastTable"></div>
                 </div>
+
             </div>
 
-            <!-- HEALTH SCORES TAB -->
-            <div id="healthTab" class="admin-tab">
-                <div class="admin-page-header">
-                    <h1>
-                        <span class="icon">
-                            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style="width:1.2em;height:1.2em">
-                                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
-                            </svg>
-                        </span>
-                        Health Score Leaderboard
-                    </h1>
-                </div>
-                <div class="card">
-                    <div class="card-header">
-                        <span>
-                            <!-- Trophy icon replacing 🏆 -->
-                            <span class="icon">
-                                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M6 9H4a2 2 0 0 0-2 2v1a5 5 0 0 0 5 5h.5"/>
-                                    <path d="M18 9h2a2 2 0 0 1 2 2v1a5 5 0 0 1-5 5h-.5"/>
-                                    <path d="M8 21h8M12 17v4"/>
-                                    <rect x="6" y="2" width="12" height="13" rx="2"/>
-                                </svg>
-                            </span>
-                            All Users Ranked by Financial Health
-                        </span>
-                        <span class="card-badge">Live</span>
+            <div id="forecastEmpty" style="display:none;" class="card">
+                <div style="text-align:center;padding:40px 20px;color:var(--text-muted)">
+                    <div style="margin-bottom:16px;opacity:.6;">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
                     </div>
-                    <div id="healthLeaderboard"><div class="skeleton"></div></div>
+                    <div style="font-size:1rem;font-weight:600;margin-bottom:8px">No expense data found</div>
+                    <div style="font-size:.85rem">Add at least 1 month of expenses in the <strong>Expenses</strong> tab to generate a forecast.</div>
                 </div>
             </div>
+        </div>
 
-            <!-- EXPORT TAB -->
-            <div id="exportTab" class="admin-tab">
-                <div class="admin-page-header">
-                    <h1>
-                        <span class="icon">
-                            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style="width:1.2em;height:1.2em">
-                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                                <polyline points="7 10 12 15 17 10"/>
-                                <line x1="12" y1="15" x2="12" y2="3"/>
-                            </svg>
-                        </span>
-                        Export Data
-                    </h1>
-                </div>
-                <div class="grid-2">
+        <!-- SUGGESTIONS TAB -->
+        <div id="suggestionsTab" class="tab-content">
 
-                    <div class="card">
-                        <div class="card-header">
-                            <span>
-                                <!-- List icon replacing 📋 -->
-                                <span class="icon">
-                                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                        <line x1="8" y1="6" x2="21" y2="6"/>
-                                        <line x1="8" y1="12" x2="21" y2="12"/>
-                                        <line x1="8" y1="18" x2="21" y2="18"/>
-                                        <line x1="3" y1="6" x2="3.01" y2="6"/>
-                                        <line x1="3" y1="12" x2="3.01" y2="12"/>
-                                        <line x1="3" y1="18" x2="3.01" y2="18"/>
-                                    </svg>
-                                </span>
-                                Export Options
-                            </span>
-                        </div>
-                        <div style="display:flex;flex-direction:column;gap:12px;margin-top:8px">
-
-                            <button class="export-btn" onclick="exportCSV('users')">
-                                <span class="icon">
-                                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-                                        <circle cx="9" cy="7" r="4"/>
-                                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-                                        <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-                                    </svg>
-                                </span>
-                                Export All Users CSV
-                            </button>
-
-                            <button class="export-btn" onclick="exportCSV('income')">
-                                <span class="icon">
-                                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                        <rect x="2" y="7" width="20" height="14" rx="2"/>
-                                        <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/>
-                                    </svg>
-                                </span>
-                                Export All Income Records CSV
-                            </button>
-
-                            <button class="export-btn" onclick="exportCSV('expenses')">
-                                <span class="icon">
-                                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                        <path d="M14 2H6a2 2 0 0 0-2 2v16l3-2 2 2 2-2 2 2 2-2 3 2V4a2 2 0 0 0-2-2z"/>
-                                        <line x1="9" y1="9" x2="15" y2="9"/>
-                                        <line x1="9" y1="13" x2="15" y2="13"/>
-                                    </svg>
-                                </span>
-                                Export All Expense Records CSV
-                            </button>
-
-                            <button class="export-btn" onclick="exportCSV('savings')">
-                                <span class="icon">
-                                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                        <polyline points="3 9 12 2 21 9"/>
-                                        <rect x="3" y="9" width="18" height="11" rx="1"/>
-                                        <line x1="3" y1="20" x2="21" y2="20"/>
-                                        <line x1="7" y1="12" x2="7" y2="17"/>
-                                        <line x1="12" y1="12" x2="12" y2="17"/>
-                                        <line x1="17" y1="12" x2="17" y2="17"/>
-                                    </svg>
-                                </span>
-                                Export All Savings Records CSV
-                            </button>
-
-                            <button class="export-btn green" onclick="exportCSV('full')">
-                                <span class="icon">
-                                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                                        <polyline points="7 10 12 15 17 10"/>
-                                        <line x1="12" y1="15" x2="12" y2="3"/>
-                                    </svg>
-                                </span>
-                                Export Full Report CSV
-                            </button>
-
-                        </div>
+            <!-- Tips banner -->
+            <div class="card" style="background:linear-gradient(135deg,var(--surface-2),var(--surface-3));border:1px solid var(--border);">
+                <div style="display:flex;align-items:center;gap:14px;">
+                    <div style="width:48px;height:48px;border-radius:12px;background:rgba(99,102,241,.15);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
                     </div>
-
-                    <div class="card">
-                        <div class="card-header">
-                            <span>
-                                <!-- Info icon replacing ℹ️ -->
-                                <span class="icon">
-                                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                        <circle cx="12" cy="12" r="10"/>
-                                        <line x1="12" y1="16" x2="12" y2="12"/>
-                                        <line x1="12" y1="8" x2="12.01" y2="8"/>
-                                    </svg>
-                                </span>
-                                Export Info
-                            </span>
-                        </div>
-
-                        <div class="info-banner">
-                            <div class="info-icon icon">
-                                <!-- Bar chart icon replacing 📊 -->
-                                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                    <rect x="3" y="12" width="4" height="9"/><rect x="10" y="7" width="4" height="14"/><rect x="17" y="3" width="4" height="18"/>
-                                </svg>
-                            </div>
-                            <div>
-                                <strong>CSV Format</strong>
-                                <p>All exports are in CSV format which can be opened in Excel, Google Sheets, or any spreadsheet software.</p>
-                            </div>
-                        </div>
-
-                        <div class="info-banner" style="margin-top:12px">
-                            <div class="info-icon icon">
-                                <!-- Lock icon replacing 🔒 -->
-                                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                    <rect x="3" y="11" width="18" height="11" rx="2"/>
-                                    <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-                                </svg>
-                            </div>
-                            <div>
-                                <strong>Admin Only</strong>
-                                <p>These exports are only accessible to admin accounts listed in <code>admins.json</code>.</p>
-                            </div>
-                        </div>
-
+                    <div>
+                        <div style="font-weight:600;font-size:.95rem;color:var(--text-primary)">Smart Finance Suggestions</div>
+                        <div style="font-size:.82rem;color:var(--text-muted);margin-top:2px;">Curated platforms to invest, save and grow — filtered for the Indian market</div>
                     </div>
                 </div>
             </div>
 
-        </main>
-    </div>
+            <!-- Filter tabs -->
+            <div id="suggFilterRow" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px;">
+                <button class="sugg-tab active" onclick="filterSugg('all',this)">All</button>
+                <button class="sugg-tab" onclick="filterSugg('stocks',this)">Stocks</button>
+                <button class="sugg-tab" onclick="filterSugg('mf',this)">Mutual funds</button>
+                <button class="sugg-tab" onclick="filterSugg('savings',this)">Savings & FD</button>
+                <button class="sugg-tab" onclick="filterSugg('learn',this)">Learn</button>
+            </div>
+
+            <!-- Platform cards grid -->
+            <div id="suggCards" class="sugg-grid"></div>
+
+            <!-- Tips section -->
+            <div class="card" style="margin-top:8px;">
+                <div class="card-header"><span>Smart money tips</span></div>
+                <div style="display:flex;flex-direction:column;gap:10px;margin-top:4px;">
+                    <div class="tip-row"><div class="tip-num">1</div><div class="tip-text">Keep 3–6 months of expenses as an emergency fund before investing in equities.</div></div>
+                    <div class="tip-row"><div class="tip-num">2</div><div class="tip-text">If your savings ratio is below 20%, cut discretionary spending before adding new investments.</div></div>
+                    <div class="tip-row"><div class="tip-num">3</div><div class="tip-text">SIPs in index funds beat most actively managed funds over a 10+ year horizon.</div></div>
+                    <div class="tip-row"><div class="tip-num">4</div><div class="tip-text">Max out your 80C limit (₹1.5L) via ELSS funds — tax savings plus equity returns in one go.</div></div>
+                    <div class="tip-row"><div class="tip-num">5</div><div class="tip-text">Rebalance your portfolio once a year — equities grow faster and can skew your target allocation.</div></div>
+                    <div class="tip-row"><div class="tip-num">6</div><div class="tip-text">Never invest money you'll need within 3 years in equity — use FDs or liquid funds instead.</div></div>
+                </div>
+            </div>
+
+        </div>
+
+    </main>
 </div>
 
-<!-- Toast -->
+<!-- Toast notification -->
 <div id="toast" class="toast" aria-live="polite"></div>
 
-<!-- Firebase SDKs -->
+<!-- Chart.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+
+<!-- FIREBASE SDKs -->
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-<script src="admin.js"></script>
+<script src="icons.js"></script>
+<script src="app.js"></script>
 
 </body>
 </html>
