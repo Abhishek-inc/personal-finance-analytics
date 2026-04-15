@@ -17,6 +17,96 @@ const auth = firebase.auth();
 const db   = firebase.firestore();
 
 let currentUser = null;
+let isGuestMode = false;
+let guestHadData = false;  // true if guest entered data before signing in
+
+/* ── In-memory store for guest session ──────────────────── */
+const guestStore = {
+  income:     {},
+  deductions: {},
+  expenses:   {},
+  savings:    {},
+};
+
+/* ── Guest mode ─────────────────────────────────────────── */
+function enterGuestMode() {
+  isGuestMode = true;
+  guestStore.income = {}; guestStore.deductions = {};
+  guestStore.expenses = {}; guestStore.savings = {};
+
+  // Clear all form fields so previous user's data isn't visible
+  clearAllForms();
+
+  document.getElementById('authContainer').style.display = 'none';
+  document.getElementById('dashboardContainer').classList.remove('hidden');
+
+  document.getElementById('userPill').style.display       = 'none';
+  document.getElementById('guestFooter').style.display    = 'flex';
+  document.getElementById('btnLogout').style.display      = 'none';
+  document.getElementById('guestBanner').style.display    = 'flex';
+  document.getElementById('btnHeaderLogin').style.display = 'flex';
+  document.getElementById('mobileLogoutBtn').style.display = 'none';
+  document.getElementById('mobileLoginBtn').style.display  = 'flex';
+
+  switchTab('overview', document.querySelector('[data-tab="overview"]'));
+  loadAllData();
+}
+
+function clearAllForms() {
+  // Income fields
+  const el = id => document.getElementById(id);
+  if (el('incYear'))   el('incYear').value   = '2024-25';
+  if (el('salary'))    el('salary').value    = '';
+  if (el('bonus'))     el('bonus').value     = '0';
+  if (el('rental'))    el('rental').value    = '0';
+  if (el('capgains'))  el('capgains').value  = '0';
+  if (el('otherinc'))  el('otherinc').value  = '0';
+  // Deduction fields
+  if (el('d80c'))  el('d80c').value  = '0';
+  if (el('d80d'))  el('d80d').value  = '0';
+  if (el('d80g'))  el('d80g').value  = '0';
+  if (el('d24'))   el('d24').value   = '0';
+  if (el('dnps'))  el('dnps').value  = '0';
+  if (el('dhra'))  el('dhra').value  = '0';
+  // Expense fields
+  if (el('expMonth'))  el('expMonth').value  = '';
+  if (el('eRent'))     el('eRent').value     = '0';
+  if (el('eGrocery'))  el('eGrocery').value  = '0';
+  if (el('eUtil'))     el('eUtil').value     = '0';
+  if (el('eTrans'))    el('eTrans').value    = '0';
+  if (el('eEnt'))      el('eEnt').value      = '0';
+  if (el('eHealth'))   el('eHealth').value   = '0';
+  if (el('eEdu'))      el('eEdu').value      = '0';
+  // Savings fields
+  if (el('savMonth'))  el('savMonth').value  = '';
+  if (el('sFD'))       el('sFD').value       = '0';
+  if (el('sMF'))       el('sMF').value       = '0';
+  if (el('sPPF'))      el('sPPF').value      = '0';
+  if (el('sStocks'))   el('sStocks').value   = '0';
+  if (el('sGold'))     el('sGold').value     = '0';
+  if (el('sEmerg'))    el('sEmerg').value    = '0';
+}
+
+function exitGuestMode(fromForecast = false) {
+  // Remember if guest had entered any data
+  guestHadData = fromForecast && (
+    Object.keys(guestStore.income).length > 0 ||
+    Object.keys(guestStore.expenses).length > 0 ||
+    Object.keys(guestStore.savings).length > 0
+  );
+
+  isGuestMode = false;
+  document.getElementById('dashboardContainer').classList.add('hidden');
+  document.getElementById('authContainer').style.display = 'flex';
+
+  document.getElementById('userPill').style.display       = 'flex';
+  document.getElementById('guestFooter').style.display    = 'none';
+  document.getElementById('btnLogout').style.display      = 'flex';
+  document.getElementById('guestBanner').style.display    = 'none';
+  document.getElementById('btnHeaderLogin').style.display = 'none';
+  document.getElementById('mobileLogoutBtn').style.display = 'flex';
+  document.getElementById('mobileLoginBtn').style.display  = 'none';
+}
 
 const userRef    = ()   => db.collection('users').doc(currentUser.uid);
 const incomeRef  = (yr) => userRef().collection('income').doc(yr);
@@ -24,9 +114,94 @@ const deductRef  = (yr) => userRef().collection('deductions').doc(yr);
 const expenseRef = (mo) => userRef().collection('expenses').doc(mo);
 const savingRef  = (mo) => userRef().collection('savings').doc(mo);
 
+/* ── Migrate guest in-memory data into Firebase after sign-in ── */
+async function migrateGuestDataToFirebase() {
+  const ts = firebase.firestore.FieldValue.serverTimestamp();
+  const writes = [];
+
+  Object.values(guestStore.income).forEach(doc => {
+    writes.push(incomeRef(doc.financial_year).set({ ...doc, updated_at: ts }, { merge: true }));
+  });
+  Object.values(guestStore.deductions).forEach(doc => {
+    writes.push(deductRef(doc.financial_year).set({ ...doc, updated_at: ts }, { merge: true }));
+  });
+  Object.values(guestStore.expenses).forEach(doc => {
+    writes.push(expenseRef(doc.month_year).set({ ...doc, updated_at: ts }, { merge: true }));
+  });
+  Object.values(guestStore.savings).forEach(doc => {
+    writes.push(savingRef(doc.month_year).set({ ...doc, updated_at: ts }, { merge: true }));
+  });
+
+  try { await Promise.all(writes); } catch(e) { console.error('Migration error:', e); }
+
+  // Clear guest store after migration
+  guestStore.income = {}; guestStore.deductions = {};
+  guestStore.expenses = {}; guestStore.savings = {};
+}
+
 /* ══════════════════════════════════════════════════════════════
-   PARTICLES
+   ML API — connects to local Flask server (api.py)
+   Start the API with: python api.py
+   It runs on http://localhost:5000
  ══════════════════════════════════════════════════════════════ */
+const ML_API = 'http://localhost:5000/api';
+
+// Check if ML API is running
+async function mlApiAvailable() {
+  try {
+    const res = await fetch(`${ML_API}/ping`, { signal: AbortSignal.timeout(2000) });
+    return res.ok;
+  } catch { return false; }
+}
+
+// Build payload from user's Firebase data for the ML API
+async function buildMLPayload() {
+  const [incSnap, expSnaps, savSnaps, dedSnap] = await Promise.all([
+    userRef().collection('income').orderBy('financial_year','desc').limit(1).get(),
+    userRef().collection('expenses').get(),
+    userRef().collection('savings').get(),
+    userRef().collection('deductions').orderBy('financial_year','desc').limit(1).get(),
+  ]);
+
+  const inc      = incSnap.empty ? {} : incSnap.docs[0].data();
+  const expenses = expSnaps.docs.map(d => d.data());
+  const savings  = savSnaps.docs.map(d => d.data());
+  const ded      = dedSnap.empty ? {} : dedSnap.docs[0].data();
+
+  const avgExp   = expenses.length ? expenses.reduce((s,e) => s + e.total_expenses, 0) / expenses.length : 0;
+  const latestExp = expenses.length ? expenses[expenses.length - 1] : {};
+  const latestSav = savings.length  ? savings[savings.length - 1]   : {};
+
+  return {
+    total_income      : inc.total_income       || 0,
+    rent              : latestExp.rent          || 0,
+    groceries         : latestExp.groceries     || 0,
+    utilities         : latestExp.utilities     || 0,
+    transportation    : latestExp.transportation|| 0,
+    healthcare        : latestExp.healthcare    || 0,
+    education         : latestExp.education     || 0,
+    entertainment     : latestExp.entertainment || 0,
+    shopping          : latestExp.shopping      || 0,
+    insurance         : latestExp.insurance     || 0,
+    miscellaneous     : latestExp.miscellaneous || 0,
+    savings_account   : latestSav.savings_account  || 0,
+    fixed_deposits    : latestSav.fixed_deposits   || 0,
+    mutual_funds      : latestSav.mutual_funds      || 0,
+    stocks            : latestSav.stocks            || 0,
+    ppf               : latestSav.ppf               || 0,
+    epf               : latestSav.epf               || 0,
+    gold              : latestSav.gold              || 0,
+    real_estate       : latestSav.real_estate       || 0,
+    emergency_fund    : latestSav.emergency_fund    || 0,
+    monthly_sip       : latestSav.monthly_sip       || 0,
+    total_monthly_emi : inc.total_monthly_emi   || 0,
+    dependents        : 0,
+    section_80c       : ded.section_80c         || 0,
+    total_deductions  : ded.total_deductions    || 0,
+  };
+}
+
+
 function initParticles() {
   const container = document.getElementById('particles');
   for (let i = 0; i < 30; i++) {
@@ -186,6 +361,15 @@ auth.onAuthStateChanged(async user => {
     document.getElementById('userName').textContent   = name;
     document.getElementById('userAvatar').textContent = name.charAt(0).toUpperCase();
 
+    // Reset guest UI elements in case user was in guest mode
+    document.getElementById('userPill').style.display       = 'flex';
+    document.getElementById('guestFooter').style.display    = 'none';
+    document.getElementById('btnLogout').style.display      = 'flex';
+    document.getElementById('guestBanner').style.display    = 'none';
+    document.getElementById('btnHeaderLogin').style.display = 'none';
+    document.getElementById('mobileLogoutBtn').style.display = 'flex';
+    document.getElementById('mobileLoginBtn').style.display  = 'none';
+
     try {
       await userRef().set({
         online: true,
@@ -207,7 +391,17 @@ auth.onAuthStateChanged(async user => {
       }
     } catch(e) {}
 
-    loadAllData();
+    // If guest had data and signed in from forecast gate — migrate then show forecast
+    if (guestHadData) {
+      guestHadData = false;
+      toast('Migrating your data...', 'info');
+      await migrateGuestDataToFirebase();
+      toast('Data saved! Running your forecast...', 'success');
+      await loadAllData();
+      switchTab('forecast', document.querySelector('[data-tab="forecast"]'));
+    } else {
+      loadAllData();
+    }
   } else {
     document.getElementById('authContainer').style.display  = 'flex';
     document.getElementById('dashboardContainer').classList.add('hidden');
@@ -248,7 +442,8 @@ const tabMeta = {
   savings:  { title:'Savings',         subtitle:'Monitor your investment portfolio' },
   tax:      { title:'Tax Planner',     subtitle:'Compare old vs new tax regime' },
   health:   { title:'Health Score',    subtitle:'Analyse your financial fitness' },
-  forecast: { title:'6-Month Forecast',subtitle:'AI-powered expense predictions for the next 6 months' },
+  forecast:     { title:'6-Month Forecast',subtitle:'AI-powered expense predictions for the next 6 months' },
+  suggestions:  { title:'Suggestions',     subtitle:'Curated platforms and tips to grow your finances' },
 };
 
 function switchTab(name, btn) {
@@ -265,7 +460,161 @@ function switchTab(name, btn) {
   document.getElementById('pageSubtitle').textContent = meta.subtitle || '';
   const sidebar = document.getElementById('sidebar');
   if (window.innerWidth <= 900 && sidebar.classList.contains('open')) toggleSidebar();
-  if (name === 'forecast') { runForecast(); }
+
+  // Show/hide forecast login gate for guests
+  if (name === 'forecast') {
+    const gate    = document.getElementById('forecastLoginGate');
+    const content = document.getElementById('forecastResult');
+    const hero    = document.querySelector('.forecast-hero-card');
+    const cards   = document.getElementById('forecastSummaryCards');
+    if (isGuestMode) {
+      if (gate)    gate.style.display    = 'flex';
+      if (hero)    hero.style.display    = 'none';
+      if (cards)   cards.style.display   = 'none';
+      if (content) content.style.display = 'none';
+    } else {
+      if (gate)  gate.style.display  = 'none';
+      if (hero)  hero.style.display  = '';
+      if (cards) cards.style.display = '';
+      runForecast();
+    }
+  }
+
+  if (name === 'suggestions') renderSuggestions('all');
+}
+
+/* ══════════════════════════════════════════════════════════════
+   SUGGESTIONS
+ ══════════════════════════════════════════════════════════════ */
+const PLATFORMS = [
+  {
+    name:'Zerodha', type:'Stock broker',
+    desc:"India's largest discount broker. Zero brokerage on equity delivery, ₹20 flat on intraday & F&O.",
+    tags:['stocks'], badge:'Free delivery', badgeColor:'#e0f2fe', badgeTxt:'#0369a1',
+    logo:'Z', logoBg:'#dbeafe', logoTxt:'#1d4ed8',
+    logoImg:'',  // ← paste Zerodha logo URL here
+    url:'https://zerodha.com'
+  },
+  {
+    name:'Groww', type:'Stocks & mutual funds',
+    desc:'Buy stocks, MFs, ETFs and US stocks in one clean app. Best for beginners.',
+    tags:['stocks','mf'], badge:'Beginner friendly', badgeColor:'#dcfce7', badgeTxt:'#166534',
+    logo:'G', logoBg:'#dcfce7', logoTxt:'#166534',
+    logoImg:'',  // ← paste Groww logo URL here
+    url:'https://groww.in'
+  },
+  {
+    name:'Upstox', type:'Stock broker',
+    desc:'Fast execution, free demat, advanced charting and margin trading for active traders.',
+    tags:['stocks'], badge:'Active trading', badgeColor:'#ede9fe', badgeTxt:'#5b21b6',
+    logo:'U', logoBg:'#ede9fe', logoTxt:'#5b21b6',
+    logoImg:'',  // ← paste Upstox logo URL here
+    url:'https://upstox.com'
+  },
+  {
+    name:'Smallcase', type:'Thematic investing',
+    desc:'Invest in expert-curated baskets of stocks & ETFs around themes like EV, IT, FMCG or dividends.',
+    tags:['stocks'], badge:'Thematic baskets', badgeColor:'#fef3c7', badgeTxt:'#92400e',
+    logo:'S', logoBg:'#fef3c7', logoTxt:'#92400e',
+    logoImg:'',  // ← paste Smallcase logo URL here
+    url:'https://www.smallcase.com'
+  },
+  {
+    name:'Tickertape', type:'Stock research',
+    desc:'Stock screener, fundamental analysis and portfolio X-ray for Indian equities and MFs.',
+    tags:['stocks','learn'], badge:'Research tool', badgeColor:'#dbeafe', badgeTxt:'#1e40af',
+    logo:'T', logoBg:'#dbeafe', logoTxt:'#1e40af',
+    logoImg:'',  // ← paste Tickertape logo URL here
+    url:'https://www.tickertape.in'
+  },
+  {
+    name:'Coin by Zerodha', type:'Direct mutual funds',
+    desc:'Buy direct MFs with zero commission. Higher returns vs regular plans over the long run.',
+    tags:['mf'], badge:'Zero commission', badgeColor:'#dcfce7', badgeTxt:'#166534',
+    logo:'C', logoBg:'#dcfce7', logoTxt:'#166534',
+    logoImg:'',  // ← paste Coin logo URL here
+    url:'https://coin.zerodha.com'
+  },
+  {
+    name:'ET Money', type:'MF & insurance',
+    desc:'SIP tracking, direct mutual funds, term insurance and NPS — all in one app.',
+    tags:['mf','savings'], badge:'All-in-one', badgeColor:'#dbeafe', badgeTxt:'#1e40af',
+    logo:'E', logoBg:'#dbeafe', logoTxt:'#1e40af',
+    logoImg:'',  // ← paste ET Money logo URL here
+    url:'https://www.etmoney.com'
+  },
+  {
+    name:'Kuvera', type:'Direct MF & FD',
+    desc:'Free direct mutual fund platform with goal-based planning and FD comparison across banks.',
+    tags:['mf','savings'], badge:'Goal planning', badgeColor:'#dcfce7', badgeTxt:'#166534',
+    logo:'K', logoBg:'#dcfce7', logoTxt:'#166534',
+    logoImg:'',  // ← paste Kuvera logo URL here
+    url:'https://kuvera.in'
+  },
+  {
+    name:'Paytm Money', type:'MF, stocks & NPS',
+    desc:'Stocks, ETFs, mutual funds and NPS for additional 80CCD tax benefit.',
+    tags:['mf','savings'], badge:'NPS + tax saving', badgeColor:'#fef3c7', badgeTxt:'#92400e',
+    logo:'P', logoBg:'#fef3c7', logoTxt:'#92400e',
+    logoImg:'',  // ← paste Paytm Money logo URL here
+    url:'https://www.paytmmoney.com'
+  },
+  {
+    name:'Stable Money', type:'FD & bonds',
+    desc:'Compare and book FDs from 25+ banks and NBFCs. Some offering up to 9.5% annual returns.',
+    tags:['savings'], badge:'Up to 9.5% FD', badgeColor:'#fef3c7', badgeTxt:'#92400e',
+    logo:'SM', logoBg:'#fef3c7', logoTxt:'#92400e',
+    logoImg:'',  // ← paste Stable Money logo URL here
+    url:'https://stablemoney.in'
+  },
+  {
+    name:'Zerodha Varsity', type:'Free courses',
+    desc:"India's best free stock market education. Covers basics, technical analysis, options and more.",
+    tags:['learn'], badge:'Free & in-depth', badgeColor:'#dbeafe', badgeTxt:'#1e40af',
+    logo:'V', logoBg:'#dbeafe', logoTxt:'#1e40af',
+    logoImg:'',  // ← paste Varsity logo URL here
+    url:'https://zerodha.com/varsity'
+  },
+  {
+    name:'Finshots', type:'Daily newsletter',
+    desc:'5-minute finance and business news explained simply. Great for staying sharp without the jargon.',
+    tags:['learn'], badge:'Daily digest', badgeColor:'#ede9fe', badgeTxt:'#5b21b6',
+    logo:'F', logoBg:'#ede9fe', logoTxt:'#5b21b6',
+    logoImg:'',  // ← paste Finshots logo URL here
+    url:'https://finshots.in'
+  },
+];
+
+function filterSugg(tag, btn) {
+  document.querySelectorAll('.sugg-tab').forEach(t => t.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  renderSuggestions(tag);
+}
+
+function renderSuggestions(tag) {
+  const filtered = tag === 'all' ? PLATFORMS : PLATFORMS.filter(p => p.tags.includes(tag));
+  const grid = document.getElementById('suggCards');
+  if (!grid) return;
+  grid.innerHTML = filtered.map(p => {
+    const logoHtml = p.logoImg
+      ? `<img src="${p.logoImg}" alt="${p.name}" style="width:40px;height:40px;border-radius:10px;object-fit:contain;display:block;">`
+      : `<div class="sugg-logo" style="background:${p.logoBg};color:${p.logoTxt}">${p.logo}</div>`;
+    return `
+    <a class="sugg-card" href="${p.url}" target="_blank" rel="noopener noreferrer">
+      <div class="sugg-card-top">
+        <div style="width:40px;height:40px;border-radius:10px;flex-shrink:0;overflow:hidden;">${logoHtml}</div>
+        <div>
+          <div class="sugg-name">${p.name}</div>
+          <div class="sugg-type">${p.type}</div>
+        </div>
+      </div>
+      <div class="sugg-desc">${p.desc}</div>
+      <div class="sugg-footer">
+        <span class="sugg-badge" style="background:${p.badgeColor};color:${p.badgeTxt}">${p.badge}</span>
+        <span class="sugg-link">Visit →</span>
+      </div>
+    </a>`;
+  }).join('');
 }
 
 /* ══════════════════════════════════════════════════════════════
@@ -280,9 +629,13 @@ async function saveIncome() {
     rental_income:  num('rental'),
     capital_gains:  num('capgains'),
     other_income:   num('otherinc'),
-    updated_at:     firebase.firestore.FieldValue.serverTimestamp()
   };
   doc.total_income = doc.salary + doc.bonus + doc.rental_income + doc.capital_gains + doc.other_income;
+  if (isGuestMode) {
+    guestStore.income[yr] = doc;
+    toast('Income saved!', 'success'); loadAllData(); return;
+  }
+  doc.updated_at = firebase.firestore.FieldValue.serverTimestamp();
   try   { await incomeRef(yr).set(doc, { merge: true }); toast('Income saved!', 'success'); loadAllData(); }
   catch (e) { toast('Error: ' + e.message, 'error'); }
 }
@@ -290,16 +643,20 @@ async function saveIncome() {
 async function saveDeductions() {
   const yr  = v('incYear') || '2024-25';
   const doc = {
-    financial_year: yr,
-    section_80c:    num('d80c'),
-    section_80d:    num('d80d'),
-    section_80g:    num('d80g'),
-    section_24:     num('d24'),
-    nps_80ccd:      num('dnps'),
-    hra_exemption:  num('dhra'),
-    updated_at:     firebase.firestore.FieldValue.serverTimestamp()
+    financial_year:  yr,
+    section_80c:     num('d80c'),
+    section_80d:     num('d80d'),
+    section_80g:     num('d80g'),
+    section_24:      num('d24'),
+    nps_80ccd:       num('dnps'),
+    hra_exemption:   num('dhra'),
   };
   doc.total_deductions = doc.section_80c + doc.section_80d + doc.section_80g + doc.section_24 + doc.nps_80ccd + doc.hra_exemption;
+  if (isGuestMode) {
+    guestStore.deductions[yr] = doc;
+    toast('Deductions saved!', 'success'); loadDeductionTable(); return;
+  }
+  doc.updated_at = firebase.firestore.FieldValue.serverTimestamp();
   try   { await deductRef(yr).set(doc, { merge: true }); toast('Deductions saved!', 'success'); loadDeductionTable(); }
   catch (e) { toast('Error: ' + e.message, 'error'); }
 }
@@ -316,9 +673,13 @@ async function saveExpense() {
     entertainment:  num('eEnt'),
     healthcare:     num('eHealth'),
     education:      num('eEdu'),
-    updated_at:     firebase.firestore.FieldValue.serverTimestamp()
   };
   doc.total_expenses = doc.rent + doc.groceries + doc.utilities + doc.transportation + doc.entertainment + doc.healthcare + doc.education;
+  if (isGuestMode) {
+    guestStore.expenses[mo] = doc;
+    toast('Expenses saved!', 'success'); loadAllData(); return;
+  }
+  doc.updated_at = firebase.firestore.FieldValue.serverTimestamp();
   try   { await expenseRef(mo).set(doc, { merge: true }); toast('Expenses saved!', 'success'); loadAllData(); }
   catch (e) { toast('Error: ' + e.message, 'error'); }
 }
@@ -334,27 +695,34 @@ async function saveSavings() {
     stocks:         num('sStocks'),
     gold:           num('sGold'),
     emergency_fund: num('sEmerg'),
-    updated_at:     firebase.firestore.FieldValue.serverTimestamp()
   };
   doc.total_savings = doc.fixed_deposits + doc.mutual_funds + doc.ppf + doc.stocks + doc.gold + doc.emergency_fund;
+  if (isGuestMode) {
+    guestStore.savings[mo] = doc;
+    toast('Savings saved!', 'success'); loadAllData(); return;
+  }
+  doc.updated_at = firebase.firestore.FieldValue.serverTimestamp();
   try   { await savingRef(mo).set(doc, { merge: true }); toast('Savings saved!', 'success'); loadAllData(); }
   catch (e) { toast('Error: ' + e.message, 'error'); }
 }
 
 async function deleteExpense(mo) {
   if (!confirm(`Delete expense record for ${mo}?`)) return;
+  if (isGuestMode) { delete guestStore.expenses[mo]; toast('Deleted!', 'success'); loadAllData(); return; }
   try   { await expenseRef(mo).delete(); toast('Deleted!', 'success'); loadAllData(); }
   catch (e) { toast('Error: ' + e.message, 'error'); }
 }
 
 async function deleteSaving(mo) {
   if (!confirm(`Delete savings record for ${mo}?`)) return;
+  if (isGuestMode) { delete guestStore.savings[mo]; toast('Deleted!', 'success'); loadAllData(); return; }
   try   { await savingRef(mo).delete(); toast('Deleted!', 'success'); loadAllData(); }
   catch (e) { toast('Error: ' + e.message, 'error'); }
 }
 
 async function deleteDeduction(yr) {
   if (!confirm(`Delete deduction record for FY ${yr}?`)) return;
+  if (isGuestMode) { delete guestStore.deductions[yr]; toast('Deleted!', 'success'); loadDeductionTable(); return; }
   try   { await deductRef(yr).delete(); toast('Deleted!', 'success'); loadDeductionTable(); }
   catch (e) { toast('Error: ' + e.message, 'error'); }
 }
@@ -363,19 +731,28 @@ async function deleteDeduction(yr) {
    LOAD FUNCTIONS
  ══════════════════════════════════════════════════════════════ */
 async function loadAllData() {
+  if (!currentUser && !isGuestMode) return;
   await Promise.all([loadOverview(), loadIncomeTable(), loadDeductionTable(), loadExpenseTable(), loadSavingsTable()]);
 }
 
 async function loadOverview() {
   try {
-    const [incSnap, expSnap, savSnap] = await Promise.all([
-      userRef().collection('income').orderBy('financial_year','desc').limit(1).get(),
-      userRef().collection('expenses').get(),
-      userRef().collection('savings').get()
-    ]);
-    const inc      = incSnap.empty ? null : incSnap.docs[0].data();
-    const expenses = expSnap.docs.map(d => d.data());
-    const savings  = savSnap.docs.map(d => d.data());
+    let inc, expenses, savings;
+    if (isGuestMode) {
+      const incVals = Object.values(guestStore.income).sort((a,b) => b.financial_year.localeCompare(a.financial_year));
+      inc      = incVals.length ? incVals[0] : null;
+      expenses = Object.values(guestStore.expenses);
+      savings  = Object.values(guestStore.savings);
+    } else {
+      const [incSnap, expSnap, savSnap] = await Promise.all([
+        userRef().collection('income').orderBy('financial_year','desc').limit(1).get(),
+        userRef().collection('expenses').get(),
+        userRef().collection('savings').get()
+      ]);
+      inc      = incSnap.empty ? null : incSnap.docs[0].data();
+      expenses = expSnap.docs.map(d => d.data());
+      savings  = savSnap.docs.map(d => d.data());
+    }
     const totalInc = inc ? inc.total_income : 0;
     const avgExp   = expenses.length
       ? expenses.reduce((s, e) => s + e.total_expenses, 0) / expenses.length : 0;
@@ -430,91 +807,103 @@ async function loadOverview() {
 
 async function loadIncomeTable() {
   try {
-    const snap = await userRef().collection('income').orderBy('financial_year','desc').get();
-    if (snap.empty) {
+    let rows;
+    if (isGuestMode) {
+      rows = Object.values(guestStore.income).sort((a,b) => b.financial_year.localeCompare(a.financial_year));
+    } else {
+      const snap = await userRef().collection('income').orderBy('financial_year','desc').get();
+      rows = snap.docs.map(d => d.data());
+    }
+    if (!rows.length) {
       document.getElementById('incomeTable').innerHTML = '<p style="color:var(--text-muted);font-size:.9rem;">No income records yet.</p>';
       return;
     }
     document.getElementById('incomeTable').innerHTML = `
       <div class="table-wrap"><table>
         <thead><tr><th>Year</th><th>Salary</th><th>Bonus</th><th>Rental</th><th>Capital Gains</th><th>Other</th><th>Total</th></tr></thead>
-        <tbody>${snap.docs.map(d => {
-          const r = d.data();
-          return `<tr>
+        <tbody>${rows.map(r => `<tr>
             <td>${r.financial_year}</td><td>${fmt(r.salary)}</td><td>${fmt(r.bonus)}</td>
             <td>${fmt(r.rental_income||0)}</td><td>${fmt(r.capital_gains||0)}</td>
             <td>${fmt(r.other_income||0)}</td><td><strong>${fmt(r.total_income)}</strong></td>
-          </tr>`;
-        }).join('')}</tbody>
+          </tr>`).join('')}</tbody>
       </table></div>`;
   } catch (e) { document.getElementById('incomeTable').innerHTML = `<p style="color:var(--red);">${e.message}</p>`; }
 }
 
 async function loadDeductionTable() {
   try {
-    const snap = await userRef().collection('deductions').orderBy('financial_year','desc').get();
-    if (snap.empty) {
+    let rows;
+    if (isGuestMode) {
+      rows = Object.values(guestStore.deductions).sort((a,b) => b.financial_year.localeCompare(a.financial_year));
+    } else {
+      const snap = await userRef().collection('deductions').orderBy('financial_year','desc').get();
+      rows = snap.docs.map(d => d.data());
+    }
+    if (!rows.length) {
       document.getElementById('deductionTable').innerHTML = '<p style="color:var(--text-muted);font-size:.9rem;">No deduction records yet.</p>';
       return;
     }
     document.getElementById('deductionTable').innerHTML = `
       <div class="table-wrap"><table>
         <thead><tr><th>Year</th><th>80C</th><th>80D</th><th>80G</th><th>Home Loan</th><th>NPS</th><th>HRA</th><th>Total</th><th>Action</th></tr></thead>
-        <tbody>${snap.docs.map(d => {
-          const r = d.data();
-          return `<tr>
+        <tbody>${rows.map(r => `<tr>
             <td>${r.financial_year}</td><td>${fmt(r.section_80c||0)}</td><td>${fmt(r.section_80d||0)}</td>
             <td>${fmt(r.section_80g||0)}</td><td>${fmt(r.section_24||0)}</td><td>${fmt(r.nps_80ccd||0)}</td>
             <td>${fmt(r.hra_exemption||0)}</td><td><strong>${fmt(r.total_deductions||0)}</strong></td>
             <td><button class="action-btn del" onclick="deleteDeduction('${r.financial_year}')">Delete</button></td>
-          </tr>`;
-        }).join('')}</tbody>
+          </tr>`).join('')}</tbody>
       </table></div>`;
   } catch (e) { document.getElementById('deductionTable').innerHTML = `<p style="color:var(--red);">${e.message}</p>`; }
 }
 
 async function loadExpenseTable() {
   try {
-    const snap = await userRef().collection('expenses').orderBy('month_year','desc').get();
-    if (snap.empty) {
+    let rows;
+    if (isGuestMode) {
+      rows = Object.values(guestStore.expenses).sort((a,b) => b.month_year.localeCompare(a.month_year));
+    } else {
+      const snap = await userRef().collection('expenses').orderBy('month_year','desc').get();
+      rows = snap.docs.map(d => d.data());
+    }
+    if (!rows.length) {
       document.getElementById('expenseTable').innerHTML = '<p style="color:var(--text-muted);font-size:.9rem;">No expense records yet.</p>';
       return;
     }
     document.getElementById('expenseTable').innerHTML = `
       <div class="table-wrap"><table>
         <thead><tr><th>Month</th><th>Rent</th><th>Groceries</th><th>Utilities</th><th>Transport</th><th>Total</th><th>Action</th></tr></thead>
-        <tbody>${snap.docs.map(d => {
-          const r = d.data();
-          return `<tr>
+        <tbody>${rows.map(r => `<tr>
             <td>${r.month_year}</td><td>${fmt(r.rent)}</td><td>${fmt(r.groceries)}</td>
             <td>${fmt(r.utilities)}</td><td>${fmt(r.transportation)}</td>
             <td><strong>${fmt(r.total_expenses)}</strong></td>
             <td><button class="action-btn del" onclick="deleteExpense('${r.month_year}')">Delete</button></td>
-          </tr>`;
-        }).join('')}</tbody>
+          </tr>`).join('')}</tbody>
       </table></div>`;
   } catch (e) { document.getElementById('expenseTable').innerHTML = `<p style="color:var(--red);">${e.message}</p>`; }
 }
 
 async function loadSavingsTable() {
   try {
-    const snap = await userRef().collection('savings').orderBy('month_year','desc').get();
-    if (snap.empty) {
+    let rows;
+    if (isGuestMode) {
+      rows = Object.values(guestStore.savings).sort((a,b) => b.month_year.localeCompare(a.month_year));
+    } else {
+      const snap = await userRef().collection('savings').orderBy('month_year','desc').get();
+      rows = snap.docs.map(d => d.data());
+    }
+    if (!rows.length) {
       document.getElementById('savingsTable').innerHTML = '<p style="color:var(--text-muted);font-size:.9rem;">No savings records yet.</p>';
       return;
     }
     document.getElementById('savingsTable').innerHTML = `
       <div class="table-wrap"><table>
         <thead><tr><th>Month</th><th>FDs</th><th>Mutual Funds</th><th>PPF</th><th>Stocks</th><th>Total</th><th>Action</th></tr></thead>
-        <tbody>${snap.docs.map(d => {
-          const r = d.data();
-          return `<tr>
+        <tbody>${rows.map(r => `<tr>
             <td>${r.month_year}</td><td>${fmt(r.fixed_deposits)}</td><td>${fmt(r.mutual_funds)}</td>
             <td>${fmt(r.ppf)}</td><td>${fmt(r.stocks)}</td>
             <td><strong>${fmt(r.total_savings)}</strong></td>
             <td><button class="action-btn del" onclick="deleteSaving('${r.month_year}')">Delete</button></td>
-          </tr>`;
-        }).join('')}</tbody>
+          </tr>`).join('')}</tbody>
       </table></div>`;
   } catch (e) { document.getElementById('savingsTable').innerHTML = `<p style="color:var(--red);">${e.message}</p>`; }
 }
@@ -523,6 +912,51 @@ async function loadSavingsTable() {
    TAX CALCULATOR
  ══════════════════════════════════════════════════════════════ */
 async function calculateTax() {
+  if (isGuestMode) {
+    const result = document.getElementById('taxResult');
+    const yr = v('taxYear') || '2024-25';
+    const inc = guestStore.income[yr];
+    const ded = guestStore.deductions[yr] || {};
+    if (!inc) {
+      result.innerHTML = `<p style="color:var(--text-muted);text-align:center;padding:16px 0;">No income saved for ${yr}. Go to the <strong>Income</strong> tab, fill in your details and click <strong>Save Income</strong> first.</p>`;
+      return;
+    }
+    const gross = inc.total_income;
+    const std = 50000;
+    const totalDed = Math.min(ded.section_80c||0, 150000) + Math.min(ded.section_80d||0, 25000)
+                   + (ded.section_80g||0) + Math.min(ded.section_24||0, 200000)
+                   + Math.min(ded.nps_80ccd||0, 50000) + (ded.hra_exemption||0);
+    const oldTaxable  = Math.max(0, gross - std - totalDed);
+    const oldTax      = calcOldTax(oldTaxable);
+    const newStd      = 75000;
+    const newTaxable  = Math.max(0, gross - newStd);
+    const newTax      = calcNewTax(newTaxable);
+    const recommended = oldTax <= newTax ? 'old' : 'new';
+    const saved       = Math.abs(oldTax - newTax);
+    result.innerHTML = `
+      <div class="tax-grid">
+        <div class="tax-panel ${recommended === 'old' ? 'winner' : ''}">
+          <h3>Old Regime ${recommended === 'old' ? '(recommended)' : ''}</h3>
+          <div class="metric-row"><span>Gross Income</span><span class="metric-val">${fmt(gross)}</span></div>
+          <div class="metric-row"><span>Total Deductions</span><span class="metric-val">${fmt(std + totalDed)}</span></div>
+          <div class="metric-row"><span>Taxable Income</span><span class="metric-val">${fmt(oldTaxable)}</span></div>
+          <div class="metric-row"><span>Tax + Cess</span><span class="metric-val danger">${fmt(oldTax)}</span></div>
+          <div class="metric-row"><span>Effective Rate</span><span class="metric-val">${gross ? ((oldTax/gross)*100).toFixed(2) : 0}%</span></div>
+          <div class="metric-row"><span>Post-Tax Income</span><span class="metric-val">${fmt(gross-oldTax)}</span></div>
+        </div>
+        <div class="tax-panel ${recommended === 'new' ? 'winner' : ''}">
+          <h3>New Regime ${recommended === 'new' ? '(recommended)' : ''}</h3>
+          <div class="metric-row"><span>Gross Income</span><span class="metric-val">${fmt(gross)}</span></div>
+          <div class="metric-row"><span>Standard Deduction</span><span class="metric-val">${fmt(newStd)}</span></div>
+          <div class="metric-row"><span>Taxable Income</span><span class="metric-val">${fmt(newTaxable)}</span></div>
+          <div class="metric-row"><span>Tax + Cess</span><span class="metric-val danger">${fmt(newTax)}</span></div>
+          <div class="metric-row"><span>Effective Rate</span><span class="metric-val">${gross ? ((newTax/gross)*100).toFixed(2) : 0}%</span></div>
+          <div class="metric-row"><span>Post-Tax Income</span><span class="metric-val">${fmt(gross-newTax)}</span></div>
+        </div>
+      </div>
+      <div class="tax-reco">Choose the <strong>${recommended.toUpperCase()} REGIME</strong> and save <strong>${fmt(saved)}</strong> in taxes this year.</div>`;
+    return;
+  }
   const yr     = v('taxYear') || '2024-25';
   const result = document.getElementById('taxResult');
   result.innerHTML = '<div class="loading-state"><div class="skeleton"></div><div class="skeleton short"></div></div>';
@@ -599,9 +1033,120 @@ function calcNewTax(inc) {
    HEALTH SCORE
  ══════════════════════════════════════════════════════════════ */
 async function calcHealth() {
+  if (isGuestMode) {
+    const result = document.getElementById('healthResult');
+    const incVals  = Object.values(guestStore.income);
+    const expVals  = Object.values(guestStore.expenses);
+    const savVals  = Object.values(guestStore.savings);
+    if (!incVals.length) {
+      result.innerHTML = `<p style="color:var(--text-muted);text-align:center;padding:16px 0;">No income saved yet. Go to the <strong>Income</strong> tab, enter your details and click <strong>Save Income</strong> first.</p>`;
+      return;
+    }
+    const annualInc = incVals.sort((a,b) => b.financial_year.localeCompare(a.financial_year))[0].total_income;
+    const avgExp    = expVals.length ? expVals.reduce((s,e) => s + e.total_expenses, 0) / expVals.length : 0;
+    const totalSav  = savVals.reduce((s,sv) => s + sv.total_savings, 0);
+    const annualExp = avgExp * 12;
+    const avgSav    = savVals.length ? totalSav / savVals.length : 0;
+    const annualSav = avgSav * 12;
+    const savRatio  = annualInc > 0 ? (annualSav / annualInc) * 100 : 0;
+    const expRatio  = annualInc > 0 ? (annualExp / annualInc) * 100 : 0;
+    const savScore  = Math.min(40, savRatio * 2);
+    const expScore  = expRatio <= 50 ? 40 : Math.max(0, 40 - (expRatio - 50));
+    const divScore  = savVals.length > 0 ? Math.min(20,
+      [s=>s.fixed_deposits, s=>s.mutual_funds, s=>s.ppf, s=>s.stocks, s=>s.gold, s=>s.emergency_fund]
+      .filter(fn => savVals.some(s => fn(s) > 0)).length * (20/6)) : 0;
+    const overall   = Math.min(100, Math.round(savScore + expScore + divScore));
+    const cat       = overall >= 80 ? 'Excellent' : overall >= 60 ? 'Good' : overall >= 40 ? 'Fair' : 'Needs Attention';
+    const catColor  = overall >= 80 ? 'var(--green)' : overall >= 60 ? '#6C63FF' : overall >= 40 ? 'var(--yellow)' : 'var(--red)';
+    const circumference = 2 * Math.PI * 70;
+    const dash      = (overall / 100) * circumference;
+    const recs = [];
+    if (savRatio < 20) recs.push('Increase your savings — aim for at least 20% of annual income.');
+    if (expRatio > 50) recs.push(`Reduce monthly expenses — currently ${expRatio.toFixed(0)}% of income.`);
+    if (divScore < 15) recs.push('Diversify investments: add stocks, mutual funds, or gold.');
+    if (overall >= 80) recs.push('You\'re doing great! Stay consistent and review your portfolio annually.');
+    result.innerHTML = `
+      <div class="health-score-circle">
+        <div class="score-ring">
+          <svg viewBox="0 0 160 160">
+            <circle class="bg-ring" cx="80" cy="80" r="70"/>
+            <circle class="fg-ring" id="healthRing" cx="80" cy="80" r="70" stroke="${catColor}" stroke-dasharray="0 ${circumference}"/>
+          </svg>
+          <div class="score-center">
+            <div class="score-num" style="color:${catColor}">${overall}</div>
+            <div class="score-label">Score</div>
+          </div>
+        </div>
+        <div class="health-cat" style="color:${catColor}">${cat}</div>
+      </div>
+      <div class="health-metrics">
+        <div class="hm-card">
+          <div class="hm-val">${savRatio.toFixed(1)}%</div>
+          <div class="hm-label">Savings Ratio<span class="hm-badge" style="color:${savRatio>=20?'var(--green)':'var(--red)'}">${savRatio>=20?' Good (above 20%)':' Low (below 20%)'}</span></div>
+        </div>
+        <div class="hm-card">
+          <div class="hm-val">${expRatio.toFixed(1)}%</div>
+          <div class="hm-label">Expense Ratio<span class="hm-badge" style="color:${expRatio<=50?'var(--green)':'var(--red)'}">${expRatio<=50?' Good (50% or less)':' High (above 50%)'}</span></div>
+        </div>
+        <div class="hm-card"><div class="hm-val">${fmt(totalSav)}</div><div class="hm-label">Monthly Savings Entered</div></div>
+      </div>
+      <div class="health-reco"><strong>Recommendations:</strong><ul style="margin-top:8px;">${recs.map(r=>`<li>${r}</li>`).join('')}</ul></div>`;
+    setTimeout(() => {
+      const ring = document.getElementById('healthRing');
+      if (ring) ring.style.strokeDasharray = `${dash} ${circumference}`;
+    }, 100);
+    return;
+  }
   const result = document.getElementById('healthResult');
   result.innerHTML = '<div class="loading-state"><div class="skeleton"></div><div class="skeleton short"></div><div class="skeleton"></div></div>';
   try {
+    // ── Try ML API first ──────────────────────────────────────
+    const mlAvail = await mlApiAvailable();
+    if (mlAvail) {
+      const payload = await buildMLPayload();
+      const res     = await fetch(`${ML_API}/health`, {
+        method : 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body   : JSON.stringify(payload),
+      });
+      const ml = await res.json();
+      if (ml.success) {
+        const overall    = ml.health_score;
+        const stressLvl  = ml.stress_level;
+        const recs       = ml.risk_flags.length ? ml.risk_flags : ['You\'re doing great! Stay consistent and review your portfolio annually.'];
+        const cat        = overall >= 80 ? 'Excellent' : overall >= 60 ? 'Good' : overall >= 40 ? 'Fair' : 'Needs Attention';
+        const catColor   = overall >= 80 ? 'var(--green)' : overall >= 60 ? '#6C63FF' : overall >= 40 ? 'var(--yellow)' : 'var(--red)';
+        const circumference = 2 * Math.PI * 70;
+        const dash       = (overall / 100) * circumference;
+        const stressColor = stressLvl === 'Low' ? 'var(--green)' : stressLvl === 'Medium' ? 'var(--yellow)' : 'var(--red)';
+        result.innerHTML = `
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;font-size:.78rem;color:var(--text-muted);">
+            <span style="background:rgba(99,102,241,.12);color:var(--accent);padding:2px 10px;border-radius:20px;font-weight:600;">ML Powered</span>
+            Stress level: <span style="color:${stressColor};font-weight:600;">${stressLvl}</span>
+          </div>
+          <div class="health-score-circle">
+            <div class="score-ring">
+              <svg viewBox="0 0 160 160">
+                <circle class="bg-ring" cx="80" cy="80" r="70"/>
+                <circle class="fg-ring" id="healthRing" cx="80" cy="80" r="70" stroke="${catColor}" stroke-dasharray="0 ${circumference}"/>
+              </svg>
+              <div class="score-center">
+                <div class="score-num" style="color:${catColor}">${overall}</div>
+                <div class="score-label">Score</div>
+              </div>
+            </div>
+            <div class="health-cat" style="color:${catColor}">${cat}</div>
+          </div>
+          <div class="health-reco"><strong>Recommendations:</strong><ul style="margin-top:8px;">${recs.map(r=>`<li>${r}</li>`).join('')}</ul></div>`;
+        setTimeout(() => {
+          const ring = document.getElementById('healthRing');
+          if (ring) ring.style.strokeDasharray = `${dash} ${circumference}`;
+        }, 100);
+        return;
+      }
+    }
+
+    // ── Fallback: rule-based calculation ──────────────────────
     const [incSnap, expSnaps, savSnaps] = await Promise.all([
       userRef().collection('income').orderBy('financial_year','desc').limit(1).get(),
       userRef().collection('expenses').get(),
@@ -770,8 +1315,27 @@ async function runForecast() {
     });
 
     const forecastMonths = Array.from({length:6}, (_,i) => addMonths(latestMonth, i+1));
-    const forecastTotals = forecastMonths.map((_,mi) =>
+    let forecastTotals   = forecastMonths.map((_,mi) =>
       CATEGORIES.reduce((s,cat) => s + catForecasts[cat.key][mi], 0));
+
+    // ── Try ML API for improved totals ────────────────────────
+    let mlPowered = false;
+    try {
+      const mlAvail = await mlApiAvailable();
+      if (mlAvail) {
+        const payload = await buildMLPayload();
+        const mlRes   = await fetch(`${ML_API}/forecast`, {
+          method : 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body   : JSON.stringify(payload),
+        });
+        const mlData = await mlRes.json();
+        if (mlData.success) {
+          forecastTotals = mlData.forecast;
+          mlPowered = true;
+        }
+      }
+    } catch(e) { /* API not running — use rule-based */ }
 
     const avgForecast = Math.round(forecastTotals.reduce((a,b)=>a+b,0)/6);
     const trendDir    = forecastTotals[5] > forecastTotals[0];
@@ -786,7 +1350,9 @@ async function runForecast() {
       { iconName:'wallet',                        label:'Total 6-Month Budget',   val:fmt(totalBudget),            sub:'plan accordingly',                       color:'var(--yellow)'  },
       { iconName: trendDir ? 'trending_up' : 'trending_dn', label:'Spending Trend', val:`${trendDir?'+':'-'}${trendPct}%`, sub:trendDir?'expenses rising':'expenses falling', color:trendDir?'var(--red)':'var(--green)' },
     ];
-    document.getElementById('forecastSummaryCards').innerHTML = kpiData.map(k => `
+    document.getElementById('forecastSummaryCards').innerHTML =
+      (mlPowered ? `<div style="grid-column:1/-1;display:flex;align-items:center;gap:8px;font-size:.78rem;color:var(--text-muted);margin-bottom:-4px;"><span style="background:rgba(99,102,241,.12);color:var(--accent);padding:2px 10px;border-radius:20px;font-weight:600;">ML Powered</span> Forecast generated by your trained machine learning model</div>` : '') +
+      kpiData.map(k => `
       <div class="fcast-kpi-card">
         <div class="fcast-kpi-icon">${icon(k.iconName)}</div>
         <div class="fcast-kpi-body">
