@@ -1,42 +1,25 @@
 from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
 import joblib
-import numpy as np
+import pandas as pd
 
 app = FastAPI()
+model = joblib.load("RandomForestRegressor.pkl")
 
-# Allow browser requests
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+@app.post("/predict")
+def predict(data: dict):
+    df = pd.DataFrame([data])
+    pred = model.predict(df)
+    return {"stress_score": float(pred[0])}
 
-model = joblib.load("financial_health_model.pkl")
+# run this file with uvicorn server:app --reload
 
-class HealthInput(BaseModel):
-    annual_income: float
-    annual_expenses: float
-    total_savings: float
-    savings_ratio: float
-    expense_ratio: float
-
-
-@app.post("/score")
-def predict_health(data: HealthInput):
-
-    features = np.array([[
-        data.annual_income,
-        data.annual_expenses,
-        data.total_savings,
-        data.savings_ratio,
-        data.expense_ratio
-    ]])
-
-    prediction = model.predict(features)[0]
-
-    return {
-        "health_score": int(prediction)
-    }
+# below code to update in app.js
+js="""
+const response = await fetch("http://localhost:8000/predict", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify(features)
+});
+const { stress_score } = await response.json();
+console.log("Predicted stress score:", stress_score);
+"""
