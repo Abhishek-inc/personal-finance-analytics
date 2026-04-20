@@ -142,9 +142,9 @@ async function migrateGuestDataToFirebase() {
 /* ══════════════════════════════════════════════════════════════
    ML API — connects to local Flask server (api.py)
    Start the API with: python api.py
-   It runs on http://localhost:5000
+   It runs on https://financehub-api-0oxc.onrender.com/
  ══════════════════════════════════════════════════════════════ */
-const ML_API = 'http://localhost:5000/api';
+const ML_API = "'https://financehub-api-0oxc.onrender.com//api";
 
 // Check if ML API is running
 async function mlApiAvailable() {
